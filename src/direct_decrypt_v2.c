@@ -151,23 +151,33 @@ static void prepare_salsa(void) {
 #endif
 }
 
-static void decrypt_chunk(uint32_t size, uint8_t *data, uint8_t key[64]) {
+static void key_to_state(const uint8_t key[64], uint32_t state[16]) {
+    for (int i = 0; i < 16; i++) {
+        state[i] = ((uint32_t)key[i*4]) | (((uint32_t)key[i*4+1]) << 8)
+                 | (((uint32_t)key[i*4+2]) << 16) | (((uint32_t)key[i*4+3]) << 24);
+    }
+}
+
+static void decrypt_chunk(uint32_t size, uint8_t *data, uint8_t key[64], uint32_t state[16]) {
     if (use_shellcode && SALSA20_decrypt_func) {
         SALSA20_decrypt_func(size, data, key);
     } else {
-        /* Pure-C fallback: generate keystream and XOR */
-        uint32_t state[16];
-        for (int i = 0; i < 16; i++) {
-            state[i] = ((uint32_t)key[i*4]) | (((uint32_t)key[i*4+1]) << 8)
-                     | (((uint32_t)key[i*4+2]) << 16) | (((uint32_t)key[i*4+3]) << 24);
-        }
-
         uint8_t keyblock[64];
-        salsa20_block_c(state, keyblock);
+        uint32_t offset = 0;
+        while (offset < size) {
+            salsa20_block_c(state, keyblock);
+            uint32_t n = size - offset;
+            if (n > 64) n = 64;
+            for (uint32_t i = 0; i < n; i++) {
+                data[offset + i] ^= keyblock[i];
+            }
 
-        /* XOR the data with keystream (repeat as needed for chunks > 64 bytes) */
-        for (uint32_t i = 0; i < size; i++) {
-            data[i] ^= keyblock[i % 64];
+            /* Standard Salsa20 64-bit block counter in state words 8 and 9. */
+            state[8]++;
+            if (state[8] == 0) {
+                state[9]++;
+            }
+            offset += n;
         }
     }
 }
@@ -282,6 +292,8 @@ int main(int argc, char *argv[]) {
 
     int is_skip = 0;
     uint32_t decrypt_remaining = before_count;
+    uint32_t salsa_state[16];
+    key_to_state(key, salsa_state);
     long cur = 0;
 
     while (cur < body_end) {
@@ -315,7 +327,7 @@ int main(int argc, char *argv[]) {
             size_t got = fread(chunk, 1, want, fi);
             if (got == 0) break;
 
-            decrypt_chunk((uint32_t)got, chunk, key);
+            decrypt_chunk((uint32_t)got, chunk, key, salsa_state);
             fwrite(chunk, 1, got, fo);
             cur += got;
 

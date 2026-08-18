@@ -2,7 +2,7 @@
  * direct_decrypt_v2.c — Optimized body decryption for LockBit 3.0 files.
  *
  * IMPROVEMENTS OVER ORIGINAL:
- * 1. Memory-mapped I/O for better performance on large files
+ * 1. Memory-mapped I/O for better performance on large files (Linux) / VirtualAlloc (Windows)
  * 2. Progress reporting with ETA calculation
  * 3. Better error handling and recovery
  * 4. Support for files >4GB (where possible)
@@ -12,16 +12,27 @@
  * Usage:
  *   direct_decrypt_v2 <encrypted_file> <output_file> <key_hex_64_bytes> \
  *                     <before_chunk_count> <after_chunk_count> <skipped_bytes_hex>
+ *
+ * Compile:
+ *   Linux:  gcc -O2 -o direct_decrypt_v2 direct_decrypt_v2.c -D_FILE_OFFSET_BITS=64
+ *   Windows: gcc -O2 -o direct_decrypt_v2.exe direct_decrypt_v2.c
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <fcntl.h>
 #include <time.h>
+
+/* Cross-platform: conditional includes for POSIX vs Windows */
+#ifdef _WIN32
+    #include <windows.h>
+#else
+    #include <unistd.h>
+    #include <sys/types.h>
+    #include <fcntl.h>
+#endif
+
 #ifdef HAVE_FRANK_H
 #include "frank.h"
 #endif
@@ -94,22 +105,44 @@ static inline void salsa20_block_c(const uint32_t state[16], uint8_t out[64]) {
 
 /* ============================================================================
  * Shellcode-based Salsa20 (original LockBit implementation)
+ * Cross-platform: mmap on POSIX, VirtualAlloc on Windows
  * ============================================================================ */
 
-typedef void (__attribute__((stdcall)) *FUNC_SALSA20_decrypt)(uint32_t, void *, void *);
+/* Function pointer type — stdcall convention for shellcode compatibility */
+#ifdef _WIN32
+    typedef void (__stdcall *FUNC_SALSA20_decrypt)(uint32_t, void *, void *);
+#else
+    typedef void (*FUNC_SALSA20_decrypt)(uint32_t, void *, void *);
+#endif
+
 static FUNC_SALSA20_decrypt SALSA20_decrypt_func = NULL;
 static int use_shellcode = 1;
 
 static void prepare_salsa(void) {
 #ifdef HAVE_FRANK_H
-    void *p = mmap(NULL, salsa_crypt_len + MMAP_PAD,
-                   PROT_EXEC | PROT_WRITE | PROT_READ,
-                   MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+    void *p = NULL;
+
+#ifdef _WIN32
+    /* Windows: allocate executable memory with VirtualAlloc */
+    p = VirtualAlloc(NULL, salsa_crypt_len + MMAP_PAD,
+                     MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+    if (!p) {
+        fprintf(stderr, "[!] VirtualAlloc failed for shellcode — using pure-C fallback\n");
+        use_shellcode = 0;
+        return;
+    }
+#else
+    /* POSIX: allocate executable memory with mmap */
+    p = mmap(NULL, salsa_crypt_len + MMAP_PAD,
+             PROT_EXEC | PROT_WRITE | PROT_READ,
+             MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
     if (p == MAP_FAILED) {
         fprintf(stderr, "[!] mmap failed for shellcode — using pure-C fallback\n");
         use_shellcode = 0;
         return;
     }
+#endif
+
     memcpy(p, salsa_crypt, salsa_crypt_len);
     SALSA20_decrypt_func = (FUNC_SALSA20_decrypt)p;
 #else
@@ -118,23 +151,33 @@ static void prepare_salsa(void) {
 #endif
 }
 
-static void decrypt_chunk(uint32_t size, uint8_t *data, uint8_t key[64]) {
+static void key_to_state(const uint8_t key[64], uint32_t state[16]) {
+    for (int i = 0; i < 16; i++) {
+        state[i] = ((uint32_t)key[i*4]) | (((uint32_t)key[i*4+1]) << 8)
+                 | (((uint32_t)key[i*4+2]) << 16) | (((uint32_t)key[i*4+3]) << 24);
+    }
+}
+
+static void decrypt_chunk(uint32_t size, uint8_t *data, uint8_t key[64], uint32_t state[16]) {
     if (use_shellcode && SALSA20_decrypt_func) {
         SALSA20_decrypt_func(size, data, key);
     } else {
-        /* Pure-C fallback: generate keystream and XOR */
-        uint32_t state[16];
-        for (int i = 0; i < 16; i++) {
-            state[i] = ((uint32_t)key[i*4]) | (((uint32_t)key[i*4+1]) << 8)
-                     | (((uint32_t)key[i*4+2]) << 16) | (((uint32_t)key[i*4+3]) << 24);
-        }
-
         uint8_t keyblock[64];
-        salsa20_block_c(state, keyblock);
+        uint32_t offset = 0;
+        while (offset < size) {
+            salsa20_block_c(state, keyblock);
+            uint32_t n = size - offset;
+            if (n > 64) n = 64;
+            for (uint32_t i = 0; i < n; i++) {
+                data[offset + i] ^= keyblock[i];
+            }
 
-        /* XOR the data with keystream (repeat as needed for chunks > 64 bytes) */
-        for (uint32_t i = 0; i < size; i++) {
-            data[i] ^= keyblock[i % 64];
+            /* Standard Salsa20 64-bit block counter in state words 8 and 9. */
+            state[8]++;
+            if (state[8] == 0) {
+                state[9]++;
+            }
+            offset += n;
         }
     }
 }
@@ -249,6 +292,8 @@ int main(int argc, char *argv[]) {
 
     int is_skip = 0;
     uint32_t decrypt_remaining = before_count;
+    uint32_t salsa_state[16];
+    key_to_state(key, salsa_state);
     long cur = 0;
 
     while (cur < body_end) {
@@ -282,7 +327,7 @@ int main(int argc, char *argv[]) {
             size_t got = fread(chunk, 1, want, fi);
             if (got == 0) break;
 
-            decrypt_chunk((uint32_t)got, chunk, key);
+            decrypt_chunk((uint32_t)got, chunk, key, salsa_state);
             fwrite(chunk, 1, got, fo);
             cur += got;
 

@@ -16,21 +16,28 @@
  *                   [ks_extend_hex] [--threads N]
  *
  * Compile with OpenMP for parallelization:
- *   gcc -O2 -fopenmp -o brute_extend_v2 brute_extend_v2.c aplib.a -m32 \
- *       -fno-stack-protector -D_FILE_OFFSET_BITS=64
+ *   Linux:  gcc -O2 -fopenmp -o brute_extend_v2 brute_extend_v2.c aplib.a \
+ *           -fno-stack-protector -D_FILE_OFFSET_BITS=64
+ *   Windows: gcc -O2 -fopenmp -o brute_extend_v2.exe brute_extend_v2.c aplib.a
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <fcntl.h>
 #include <time.h>
 #include <errno.h>
 #include "aplib.h"
-#include <iconv.h>
+
+/* Cross-platform: conditional includes for POSIX vs Windows */
+#ifdef _WIN32
+    #include <windows.h>
+#else
+    #include <unistd.h>
+    #include <sys/types.h>
+    #include <fcntl.h>
+    #include <iconv.h>
+#endif
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -115,19 +122,68 @@ static inline void salsa20_block(const uint32_t state[16], uint8_t out[64]) {
 
 /* ============================================================================
  * Filename compression — UTF-8 to UTF-16LE then apLib compress
+ * Cross-platform: uses MultiByteToWideChar on Windows, iconv on POSIX
  * ============================================================================ */
 
-static int compress_filename_utf16le(const char *long_name, uint8_t *output, int output_max) {
+static int utf8_to_utf16le(const char *utf8_str, uint8_t *out_buf, size_t out_max) {
+    char *decoded_hex = NULL;
+    if (strncmp(utf8_str, "hex:", 4) == 0) {
+        const char *hex = utf8_str + 4;
+        size_t hex_len = strlen(hex);
+        if ((hex_len % 2) != 0) return -1;
+        decoded_hex = (char *)calloc(hex_len / 2 + 1, 1);
+        if (!decoded_hex) return -1;
+        for (size_t i = 0; i < hex_len / 2; i++) {
+            unsigned int v;
+            if (sscanf(hex + i * 2, "%2x", &v) != 1) {
+                free(decoded_hex);
+                return -1;
+            }
+            decoded_hex[i] = (char)v;
+        }
+        utf8_str = decoded_hex;
+    }
+
+#ifdef _WIN32
+    /* Windows argv may arrive as UTF-8 or the process ANSI codepage. */
+    UINT codepage = CP_UTF8;
+    int flags = MB_ERR_INVALID_CHARS;
+    int input_len = (int)strlen(utf8_str);
+    int wchars = MultiByteToWideChar(codepage, flags, utf8_str, input_len, NULL, 0);
+    if (wchars <= 0) {
+        codepage = CP_ACP;
+        flags = 0;
+        wchars = MultiByteToWideChar(codepage, flags, utf8_str, input_len, NULL, 0);
+    }
+    if (wchars <= 0) { free(decoded_hex); return -1; }
+
+    wchar_t *wide = (wchar_t *)calloc(wchars + 1, sizeof(wchar_t));
+    if (!wide) { free(decoded_hex); return -1; }
+
+    int result = MultiByteToWideChar(codepage, flags, utf8_str, input_len, wide, wchars);
+    if (result <= 0) { free(wide); free(decoded_hex); return -1; }
+
+    /* Convert wchar_t array to raw UTF-16LE bytes */
+    size_t byte_len = (size_t)(wchars * sizeof(wchar_t));
+    if (byte_len > out_max) { free(wide); free(decoded_hex); return -1; }
+    memcpy(out_buf, wide, byte_len);
+
+    free(wide);
+    free(decoded_hex);
+    return (int)byte_len;
+#else
+    /* POSIX: use iconv for UTF-8 → UTF-16LE */
     iconv_t cd = iconv_open("UTF-16LE", "UTF-8");
     if (cd == (iconv_t)-1) return -1;
 
-    size_t sourceLen = strlen(long_name);
+    size_t sourceLen = strlen(utf8_str);
     size_t bufferSize = sourceLen * 2 + 4;
+    if (bufferSize > out_max) { iconv_close(cd); free(decoded_hex); return -1; }
 
-    char *utf16Buffer = (char *)calloc(bufferSize + 1, sizeof(char));
-    if (!utf16Buffer) { iconv_close(cd); return -1; }
+    char *utf16Buffer = (char *)calloc(bufferSize, sizeof(char));
+    if (!utf16Buffer) { iconv_close(cd); free(decoded_hex); return -1; }
 
-    char *inbuf = (char *)long_name;
+    char *inbuf = (char *)utf8_str;
     char *outbuf = utf16Buffer;
     size_t inbytesleft = sourceLen;
     size_t outbytesleft = bufferSize;
@@ -135,17 +191,38 @@ static int compress_filename_utf16le(const char *long_name, uint8_t *output, int
     if (iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft) == (size_t)-1) {
         iconv_close(cd);
         free(utf16Buffer);
+        free(decoded_hex);
         return -1;
     }
     iconv_close(cd);
 
-    int finalLen = (int)(bufferSize - outbytesleft);
-    finalLen += 2;  /* null terminator pair */
+    size_t byte_len = bufferSize - outbytesleft;
+    memcpy(out_buf, utf16Buffer, byte_len);
+    free(utf16Buffer);
+    free(decoded_hex);
+    return (int)byte_len;
+#endif
+}
+
+static int compress_filename_utf16le(const char *long_name, uint8_t *output,
+                                     int output_max, uint16_t *filename_size) {
+    size_t max_conv = strlen(long_name) * 4 + 16; /* conversion buffer, independent of compressed FEI size */
+    uint8_t *utf16Buffer = (uint8_t *)calloc(max_conv, 1);
+    if (!utf16Buffer) return -1;
+
+    int conv_len = utf8_to_utf16le(long_name, utf16Buffer, max_conv);
+    if (conv_len < 0) { free(utf16Buffer); return -1; }
+
+    /* Add null terminator pair for UTF-16LE string */
+    int finalLen = conv_len + 2;
+    if (filename_size) {
+        *filename_size = (uint16_t)(finalLen - 2);
+    }
 
     void *workmem = malloc(aP_workmem_size(0));
     if (!workmem) { free(utf16Buffer); return -1; }
 
-    unsigned int sz = aP_pack((unsigned char *)utf16Buffer, output, finalLen, workmem, NULL, NULL);
+    unsigned int sz = aP_pack(utf16Buffer, output, finalLen, workmem, NULL, NULL);
     free(workmem);
     free(utf16Buffer);
     return (int)sz;
@@ -369,6 +446,44 @@ static int run_brute_force(brute_force_context *ctx) {
  * ============================================================================ */
 
 int main(int argc, char *argv[]) {
+    if (argc >= 4 && strcmp(argv[1], "--dump-ks") == 0) {
+        const char *oracle_enc = argv[2];
+        const char *oracle_name = argv[3];
+
+        FILE *fo = fopen(oracle_enc, "rb");
+        if (!fo) { perror("oracle"); return 1; }
+        fseek(fo, 0, SEEK_END);
+        fseek(fo, -OFFSET_KEY_ENCRYPTION_INFO, SEEK_END);
+
+        uint16_t ofl;
+        fread(&ofl, 2, 1, fo);
+        fseek(fo, -(OFFSET_KEY_ENCRYPTION_INFO + ofl), SEEK_END);
+
+        uint8_t *ofei = (uint8_t *)malloc(ofl);
+        if (!ofei) { fclose(fo); return 1; }
+        fread(ofei, 1, ofl, fo);
+        fclose(fo);
+
+        uint8_t *kp = (uint8_t *)calloc(ofl + 64, 1);
+        uint16_t fname_size = 0;
+        int sz = compress_filename_utf16le(oracle_name, kp, ofl - 20, &fname_size);
+        if (sz < 0 || sz > ofl) {
+            fprintf(stderr, "ERROR: Failed to build oracle known plaintext\n");
+            free(kp); free(ofei); return 1;
+        }
+
+        printf("FEI_LEN:%u\n", (unsigned int)ofl);
+        printf("NAME_KS_LEN:%d\n", sz);
+        printf("FILENAME_SIZE:%u\n", (unsigned int)fname_size);
+        printf("KS:");
+        for (int i = 0; i < sz; i++) printf("%02x", ofei[i] ^ kp[i]);
+        printf("\nSTATUS:OK_DUMP\n");
+
+        free(kp);
+        free(ofei);
+        return 0;
+    }
+
     if (argc < 9) {
         fprintf(stderr, "Usage: %s <target> <oracle> <oracle_name> <magic_hex> "
                 "<max_bytes> <before_count> <after_count> <skipped_hex> [ks_extend_hex]\n",
@@ -416,14 +531,16 @@ int main(int argc, char *argv[]) {
 
     /* Build known plaintext from oracle filename */
     uint8_t *kp = (uint8_t *)calloc(ofl + 64, 1);
-    int sz = compress_filename_utf16le(oracle_name, kp, ofl - 20);
+    uint16_t fname_size = 0;
+    int sz = compress_filename_utf16le(oracle_name, kp, ofl - 20, &fname_size);
     if (sz < 0) {
         fprintf(stderr, "ERROR: Failed to compress filename\n");
         free(kp); free(ofei); return 1;
     }
+    fprintf(stderr, "[+] Oracle compressed filename=%d bytes, filename_size=%u\n",
+            sz, (unsigned int)fname_size);
 
     /* Add fixed metadata fields */
-    uint16_t fname_size = (uint16_t)(sz - 2);  /* Subtract null terminator */
     kp[sz + 0] = fname_size & 0xFF;
     kp[sz + 1] = (fname_size >> 8) & 0xFF;
 
@@ -444,13 +561,19 @@ int main(int argc, char *argv[]) {
     kp[sz + 16] = (after_count >> 16) & 0xFF;
     kp[sz + 17] = (after_count >> 24) & 0xFF;
 
-    if ((int)(sz + 18) > ofl) {
+    if (sz > ofl) {
         fprintf(stderr, "ERROR: Oracle too short for known plaintext\n");
         free(kp); free(ofei); return 1;
     }
 
-    /* Recover keystream from oracle */
-    int known_len = sz + 18;
+    /*
+     * Recover keystream from the compressed filename only.
+     *
+     * The following 18 FEI metadata bytes are useful only after they have been
+     * proven for this sample family. Treating them as known caused false
+     * no-brute recovery on Windows, so keep the brute-force gap honest here.
+     */
+    int known_len = sz;
     uint8_t *ks = (uint8_t *)calloc(known_len + 4096, 1);
     for (int i = 0; i < known_len; i++) {
         ks[i] = ofei[i] ^ kp[i];
@@ -518,7 +641,13 @@ int main(int argc, char *argv[]) {
         uint8_t keyblock[64];
         salsa20_block(state, keyblock);
 
-        int ok = validate_magic(first_chunk, chunk_read, magic, magic_len);
+        uint8_t dec_test[16];
+        int test_len = magic_len < 16 ? magic_len : 16;
+        for (int i = 0; i < test_len && i < chunk_read; i++) {
+            dec_test[i] = first_chunk[i] ^ keyblock[i];
+        }
+
+        int ok = validate_magic(dec_test, test_len, magic, magic_len);
         if (!ok) {
             fprintf(stderr, "[!] Magic check failed — bad keystream\n");
             printf("STATUS:BAD_KEYSTREAM\n");
@@ -568,7 +697,7 @@ int main(int argc, char *argv[]) {
         /* Output results */
         printf("KSEXT:");
         for (int i = 0; i < missing; i++) {
-            printf("%02x", ks[known_len + i]);
+            printf("%02x", (unsigned int)((ctx.match_guess >> (i * 8)) & 0xFF));
         }
         printf("\n");
 

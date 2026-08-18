@@ -45,6 +45,7 @@ import struct
 import subprocess
 import sys
 import time
+import zipfile
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
@@ -75,7 +76,9 @@ KEK_LEN = 128            # RSA-encrypted KEK blob length
 OFFSET_KEY_ENCRYPTION_INFO = 0x86  # Offset from end to fei_len field
 
 # Coverage constants (derived from empirical analysis)
-COVERAGE_OFFSET = 18     # Fixed metadata bytes we can recover
+# Only count the compressed filename keystream. The 18 trailing FEI metadata
+# bytes are not yet reliable enough to use for safe Phase 1 recovery.
+COVERAGE_OFFSET = 0
 COVERAGE_BASE_FROM_FEI = 82  # Non-filename overhead in FEI
 
 # Default file size limits
@@ -368,6 +371,33 @@ def read_footer(path: Path) -> Tuple[int, bytes]:
             raise ValueError(f"Truncated KEK blob in {path}")
 
     return fei_len, kek_blob
+
+
+def read_fei_ciphertext(path: Path) -> Tuple[int, int, int, bytes, bytes]:
+    """Read encrypted FEI and KEK footer bytes.
+
+    Returns (fei_len, fei_offset, body_end, fei_ciphertext, kek_blob).
+    """
+    size = path.stat().st_size
+    with open(path, "rb") as f:
+        f.seek(-OFFSET_KEY_ENCRYPTION_INFO, os.SEEK_END)
+        fei_bytes = f.read(2)
+        if len(fei_bytes) != 2:
+            raise ValueError(f"File too small for FEI length: {path}")
+        fei_len = struct.unpack("<H", fei_bytes)[0]
+        fei_offset = size - OFFSET_KEY_ENCRYPTION_INFO - fei_len
+        body_end = fei_offset
+        if fei_offset < 0:
+            raise ValueError(f"Invalid FEI length {fei_len} for {path}")
+        f.seek(fei_offset, os.SEEK_SET)
+        fei_ciphertext = f.read(fei_len)
+        f.seek(-KEK_LEN, os.SEEK_END)
+        kek_blob = f.read(KEK_LEN)
+    if len(fei_ciphertext) != fei_len:
+        raise ValueError(f"Truncated FEI in {path}")
+    if len(kek_blob) != KEK_LEN:
+        raise ValueError(f"Truncated KEK blob in {path}")
+    return fei_len, fei_offset, body_end, fei_ciphertext, kek_blob
 
 
 def kek_fingerprint(kek_blob: bytes) -> str:
@@ -763,6 +793,65 @@ def decrypt_target(stream_reuse: Path, target_path: Path, oracle_path: Path,
     return output_path
 
 
+def recover_fek_from_oracle(brute_extend_bin: Path, target_path: Path, oracle_path: Path,
+                            oracle_orig_name: str, magic_hex: str,
+                            before_chunk: int, after_chunk: int,
+                            skipped_hex: str, timeout: int = 120) -> Optional[str]:
+    """Recover a covered target FEK using the safe brute-extend helper.
+
+    Passing max_bytes=0 turns brute-extend into a no-brute FEI/FEK extractor:
+    it derives the oracle keystream from the known original filename and checks
+    the recovered target key against the target's magic bytes.
+    """
+    result = brute_extend_target(
+        brute_extend_bin, target_path, oracle_path, oracle_orig_name,
+        magic_hex, 0, before_chunk, after_chunk, skipped_hex, None, timeout,
+    )
+    if not result or result.get("STATUS") != "OK_NOBRUTE":
+        return None
+    fek_hex = hex_clean(result.get("FEK", ""))
+    if len(fek_hex) != 128:
+        return None
+    return fek_hex
+
+
+def decrypt_target_phase1(brute_extend_bin: Path, direct_bin: Path,
+                          target_path: Path, oracle_path: Path,
+                          oracle_orig_name: str, target_original_name: str,
+                          scratch: Path, before_chunk: int, after_chunk: int,
+                          skipped_hex: str, timeout: int = 600) -> Optional[Path]:
+    """Decrypt a Phase-1 target without calling the unsafe stream-reuse binary."""
+    base_ext = target_original_name.rsplit(".", 1)[-1] if "." in target_original_name else ""
+    magic_hex = get_magic_for_extension(base_ext)
+    if not magic_hex:
+        logging.debug(f"Phase 1 skipped: no reliable magic for .{base_ext}")
+        return None
+
+    fek_hex = recover_fek_from_oracle(
+        brute_extend_bin, target_path, oracle_path, oracle_orig_name,
+        magic_hex, before_chunk, after_chunk, skipped_hex, timeout=min(timeout, 120),
+    )
+    if not fek_hex:
+        logging.debug("Phase 1 failed: FEK recovery failed")
+        return None
+
+    output_path = scratch / "_phase1_decrypted"
+    if output_path.exists():
+        try:
+            output_path.unlink()
+        except OSError:
+            return None
+
+    if not direct_decrypt_file(
+        direct_bin, target_path, output_path, fek_hex,
+        before_chunk, after_chunk, skipped_hex,
+    ):
+        logging.debug("Phase 1 failed: direct-decrypt failed")
+        return None
+
+    return output_path
+
+
 def brute_extend_target(brute_extend_bin: Path, target_path: Path, oracle_path: Path,
                         oracle_orig_name: str, magic_hex: str, max_bytes: int,
                         before_chunk: int, after_chunk: int, skipped_hex: str,
@@ -771,9 +860,10 @@ def brute_extend_target(brute_extend_bin: Path, target_path: Path, oracle_path: 
 
     Returns dict with keys: KSEXT, FEK, DEC32, STATUS or None on failure.
     """
+    oracle_name_arg = "hex:" + oracle_orig_name.encode("utf-8").hex()
     cmd = [
         str(brute_extend_bin), str(target_path), str(oracle_path),
-        oracle_orig_name, magic_hex, str(max_bytes),
+        oracle_name_arg, magic_hex, str(max_bytes),
         str(before_chunk), str(after_chunk), skipped_hex,
     ]
     if ks_extend_hex:
@@ -849,6 +939,21 @@ def get_magic_for_extension(ext: str) -> Optional[str]:
 
 def validate_decryption_with_magic(decrypted_path: Path, expected_ext: str) -> bool:
     """Validate decrypted file by checking magic bytes against expected type."""
+    expected_ext = expected_ext.lower()
+    if expected_ext == "pdf":
+        try:
+            data = decrypted_path.read_bytes()
+            return data.startswith(b"%PDF-") and b"%%EOF" in data[-4096:]
+        except OSError:
+            return False
+
+    if expected_ext in {"docx", "xlsx", "pptx"}:
+        try:
+            with zipfile.ZipFile(decrypted_path) as zf:
+                return "[Content_Types].xml" in zf.namelist()
+        except (OSError, zipfile.BadZipFile):
+            return False
+
     magic_hex = get_magic_for_extension(expected_ext)
     if not magic_hex:
         return True  # No magic to check; trust libmagic instead
@@ -860,6 +965,37 @@ def validate_decryption_with_magic(decrypted_path: Path, expected_ext: str) -> b
         return file_hex.startswith(magic_hex.lower())
     except OSError:
         return False
+
+
+def inspect_footer_layout(files: List[EncryptedFile], limit: int = 20):
+    """Print BagIRA/LockBit footer diagnostics for scanned files."""
+    if not files:
+        print("No files to inspect.")
+        return
+
+    print("file,size,fei_len,fei_offset,body_end,kek_fingerprint,fei_cipher_len")
+    suffixes_133 = []
+    suffixes_134 = []
+    for item in files[:limit]:
+        path = Path(item.path)
+        try:
+            fei_len, fei_offset, body_end, fei_ct, kek_blob = read_fei_ciphertext(path)
+            with open(path, "rb") as f:
+                f.seek(-133, os.SEEK_END)
+                suffixes_133.append(f.read(133))
+                f.seek(-134, os.SEEK_END)
+                suffixes_134.append(f.read(134))
+            print(
+                f"{path},{path.stat().st_size},{fei_len},{fei_offset},"
+                f"{body_end},{kek_fingerprint(kek_blob)},{len(fei_ct)}"
+            )
+        except Exception as exc:
+            print(f"{path},ERROR,{type(exc).__name__}: {exc}")
+
+    same_133 = len(set(suffixes_133)) == 1 if suffixes_133 else False
+    same_134 = len(set(suffixes_134)) == 1 if suffixes_134 else False
+    print(f"identical_suffix_133={same_133}")
+    print(f"identical_suffix_134={same_134}")
 
 
 # ============================================================================
@@ -904,8 +1040,9 @@ def write_manifest(results: List[DecryptionResult], manifest_path: Path,
         ])
 
         for r in results:
-            # Reconstruct original encrypted path from output info
-            orig_enc = f"{source_dir}/{r.filepath}" if source_dir else r.filepath
+            orig_path = Path(r.filepath)
+            orig_enc = str(orig_path if orig_path.is_absolute()
+                           else Path(source_dir) / orig_path)
             writer.writerow([
                 orig_enc,
                 r.original_name,
@@ -959,14 +1096,19 @@ def run_recovery(args):
     # Find required tools
     script_dir = Path(__file__).resolve().parent
     stream_reuse = find_tool(args.stream_reuse or "stream-reuse", script_dir)
-    if not stream_reuse:
-        installer = "install.ps1" if sys.platform == "win32" else "install.sh"
-        print(f"ERROR: stream-reuse binary not found. Run {installer} first.")
-        sys.exit(3)
-    logger.info(f"Using stream-reuse: {stream_reuse}")
+    if stream_reuse:
+        logger.info(f"Found stream-reuse (not used for Phase 1 on Windows): {stream_reuse}")
+    else:
+        logger.info("stream-reuse not found; safe Phase 1 does not require it")
 
-    brute_extend_bin = find_tool(args.brute_extend or "brute-extend", script_dir) if args.phase2 else None
-    direct_decrypt_bin = find_tool(args.direct_decrypt or "direct-decrypt", script_dir) if args.phase2 else None
+    brute_extend_bin = find_tool(args.brute_extend or "brute-extend", script_dir)
+    direct_decrypt_bin = find_tool(args.direct_decrypt or "direct-decrypt", script_dir)
+    if not brute_extend_bin or not direct_decrypt_bin:
+        installer = "install.ps1" if sys.platform == "win32" else "install.sh"
+        print(f"ERROR: brute-extend/direct-decrypt not found. Run {installer} first.")
+        sys.exit(3)
+    logger.info(f"Using brute-extend: {brute_extend_bin}")
+    logger.info(f"Using direct-decrypt: {direct_decrypt_bin}")
 
     # Detect ransomware extension(s)
     if not args.ext:
@@ -1028,6 +1170,11 @@ def run_recovery(args):
     logger.info(f"Total targets: {total_targets}")
     logger.info(f"Recoverable (Phase 1): {recoverable_phase1}")
     logger.info(f"Need extension (Phase 2): {needs_extension}")
+
+    if args.inspect_footer:
+        inspect_files = [f for b in batches for f in b.files]
+        inspect_footer_layout(inspect_files, args.inspect_limit)
+        return
 
     if not batches:
         logger.warning("No decryptable batches found. Check for long-named files.")
@@ -1131,9 +1278,12 @@ def run_recovery(args):
             # ==========================================================================
             decrypted = None
             if target_file.fei_len <= oracle.coverage:
-                decrypted = decrypt_target(
-                    stream_reuse, local_target, local_oracle,
-                    oracle.original_name, scratch, args.timeout,
+                decrypted = decrypt_target_phase1(
+                    brute_extend_bin, direct_decrypt_bin,
+                    local_target, local_oracle,
+                    oracle.original_name, target_file.original_name,
+                    scratch, args.before_chunk, args.after_chunk,
+                    args.skipped_hex, args.timeout,
                 )
 
             # ==========================================================================
@@ -1206,27 +1356,38 @@ def run_recovery(args):
                     # Additional magic validation
                     base_ext = torig.rsplit(".", 1)[-1] if "." in torig else ""
                     magic_valid = validate_decryption_with_magic(decrypted, base_ext)
-
-                    try:
-                        copy_with_progress(decrypted, out_path, f"    save {short_name}")
-                        decrypted.unlink()
-                        batch_ok += 1
-                        state.files_completed[target_file.path] = str(out_path)
-
-                        all_results.append(DecryptionResult(
-                            filepath=target_file.path, original_name=torig,
-                            success=True, reason="ok", file_type=file_type
-                        ))
-                    except Exception as e:
+                    if not magic_valid:
                         batch_fail += 1
                         all_results.append(DecryptionResult(
                             filepath=target_file.path, original_name=torig,
-                            success=False, reason=f"save_failed: {e}"
+                            success=False, reason=f"bad_magic_for_ext: {base_ext}",
+                            file_type=file_type,
                         ))
                         try:
                             decrypted.unlink()
                         except OSError:
                             pass
+                    else:
+                        try:
+                            copy_with_progress(decrypted, out_path, f"    save {short_name}")
+                            decrypted.unlink()
+                            batch_ok += 1
+                            state.files_completed[target_file.path] = str(out_path)
+
+                            all_results.append(DecryptionResult(
+                                filepath=target_file.path, original_name=torig,
+                                success=True, reason="ok", file_type=file_type
+                            ))
+                        except Exception as e:
+                            batch_fail += 1
+                            all_results.append(DecryptionResult(
+                                filepath=target_file.path, original_name=torig,
+                                success=False, reason=f"save_failed: {e}"
+                            ))
+                            try:
+                                decrypted.unlink()
+                            except OSError:
+                                pass
 
             # Cleanup local target
             try:
@@ -1330,6 +1491,10 @@ USAGE:
                      help=f"Skip files larger than N bytes (default: {DEFAULT_MAX_SIZE})")
     det.add_argument("--no-extension-filter", action="store_true",
                      help="Don't filter by original file type — try EVERYTHING")
+    det.add_argument("--inspect-footer", action="store_true",
+                     help="Print footer/FEI layout diagnostics and exit without recovery")
+    det.add_argument("--inspect-limit", type=int, default=20,
+                     help="Max files to include in --inspect-footer output (default: 20)")
 
     # Performance options
     perf = ap.add_argument_group("Performance Options")

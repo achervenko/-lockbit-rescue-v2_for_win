@@ -1,4 +1,4 @@
-# lockbit-rescue-v2 installer (Windows)
+﻿# lockbit-rescue-v2 installer (Windows)
 # ======================================
 # Builds all required binaries and installs Python dependencies.
 #
@@ -121,7 +121,9 @@ if (-not (python -c "import magic" 2>$null)) {
 Write-Host ""
 Write-Host "[*] Setting up upstream decryptor..."
 
-if (-not (Test-Path (Join-Path $UpstreamDir ".git"))) {
+if ((Test-Path $UpstreamDir) -and -not (Test-Path (Join-Path $UpstreamDir ".git"))) {
+    Write-Host "    Existing source directory found (no .git); using it as-is..."
+} elseif (-not (Test-Path (Join-Path $UpstreamDir ".git"))) {
     Write-Host "    Cloning: $UpstreamRepo"
     git clone --depth=1 $UpstreamRepo $UpstreamDir
 } else {
@@ -213,7 +215,9 @@ $StreamReuseSrc = Join-Path $UpstreamDir "stream-reuse.c"
 $AplibLib = Join-Path $UpstreamDir "aplib.a"
 $StreamReuseOut = Join-Path $UpstreamDir "stream-reuse.exe"
 
-if ($Compiler -eq "gcc") {
+if (Test-Path $StreamReuseOut) {
+    Write-Host "    Existing stream-reuse.exe found; skipping rebuild"
+} elseif ($Compiler -eq "gcc") {
     gcc -O0 -fno-stack-protector -D_FILE_OFFSET_BITS=64 `
         -o $StreamReuseOut $StreamReuseSrc $AplibLib 2>&1
 } else {
@@ -241,7 +245,9 @@ $BruteOut = Join-Path $UpstreamDir "brute_extend_v2.exe"
 if (Test-Path $BruteSrc) {
     Copy-Item -Force $BruteSrc (Join-Path $UpstreamDir "brute_extend_v2.c")
 
-    if ($Compiler -eq "gcc") {
+    if (Test-Path $BruteOut) {
+        Write-Host "    Existing brute_extend_v2.exe found; skipping rebuild"
+    } elseif ($Compiler -eq "gcc") {
         gcc -O2 $OpenmpFlag `
             -o $BruteOut `
             (Join-Path $UpstreamDir "brute_extend_v2.c") `
@@ -279,7 +285,9 @@ if (Test-Path $DirectSrc) {
     $HaveFrankH = Test-Path (Join-Path $UpstreamDir "frank.h")
     $DefineFrank = if ($HaveFrankH) { "/DHAVE_FRANK_H" } else { "" }
 
-    if ($Compiler -eq "gcc") {
+    if (Test-Path $DirectOut) {
+        Write-Host "    Existing direct_decrypt_v2.exe found; skipping rebuild"
+    } elseif ($Compiler -eq "gcc") {
         # Try with frank.h first, then fallback to pure-C
         gcc -O0 `
             -o $DirectOut `
