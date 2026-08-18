@@ -475,6 +475,9 @@ int main(int argc, char *argv[]) {
         printf("FEI_LEN:%u\n", (unsigned int)ofl);
         printf("NAME_KS_LEN:%d\n", sz);
         printf("FILENAME_SIZE:%u\n", (unsigned int)fname_size);
+        printf("NAME_PLAIN:");
+        for (int i = 0; i < sz; i++) printf("%02x", kp[i]);
+        printf("\n");
         printf("KS:");
         for (int i = 0; i < sz; i++) printf("%02x", ofei[i] ^ kp[i]);
         printf("\nSTATUS:OK_DUMP\n");
