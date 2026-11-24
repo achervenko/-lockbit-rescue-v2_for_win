@@ -1,0 +1,24 @@
+{
+  "kek": "YOUR_GROUP_FINGERPRINT",
+  "initial_keystream_hex": "REPLACE_WITH_CONFIRMED_CONTIGUOUS_FEI_KEYSTREAM",
+  "files": [
+    {
+      "file": "data/target.bin",
+      "original_name": "target.pdf",
+      "fei_len": 120,
+      "sha256": "REPLACE_WITH_ENCRYPTED_FILE_SHA256"
+    }
+  ],
+  "seed_tests": [],
+  "chain": [
+    {
+      "file": "data/target.bin",
+      "original_name": "target.pdf",
+      "fei_len": 120,
+      "sha256": "REPLACE_WITH_ENCRYPTED_FILE_SHA256",
+      "kind": "pdf",
+      "magic_hex": "255044462d",
+      "final": true
+    }
+  ]
+}

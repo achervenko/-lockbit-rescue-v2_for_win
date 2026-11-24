@@ -1,0 +1,1178 @@
+[
+  {
+    "source": "legacy/analyze_4f_tail_byte_bias.py",
+    "bytes": 3575,
+    "sha256": "df32d5c406f61973aa3f599b408955e7a6138e7ec8ba09e04a4c6eda823cd89c",
+    "public": true,
+    "case_literals": 4
+  },
+  {
+    "source": "legacy/analyze_624_fek_patterns.py",
+    "bytes": 4660,
+    "sha256": "e33d5538c8459ddcf3f3724cd38124ec5c5b774ebaced8fd7aa894c3ada88c8c",
+    "public": true,
+    "case_literals": 6
+  },
+  {
+    "source": "legacy/analyze_624_gap11_triplet.py",
+    "bytes": 7297,
+    "sha256": "dd3d190469413541c228fb49655b352934d1fc618dbc3fff78a9010f89de42be",
+    "public": true,
+    "case_literals": 10
+  },
+  {
+    "source": "legacy/analyze_auto_remaining.py",
+    "bytes": 6916,
+    "sha256": "b8be1be348f3d5ce6cfb29f0d7f0ceeb3c43bb169222cefec938d7017bbdf030",
+    "public": true,
+    "case_literals": 5
+  },
+  {
+    "source": "legacy/analyze_body_keystream_reuse.py",
+    "bytes": 3709,
+    "sha256": "77c43f7b8300fe8b4269ad58a03dfe3dd2db6cada837d960f785168182071205",
+    "public": true,
+    "case_literals": 3
+  },
+  {
+    "source": "legacy/analyze_sklad_fei_metadata.py",
+    "bytes": 7251,
+    "sha256": "100f286567cb8a5fbaa350fa9217fdc5e59c435810e42e082100d534c5d9f509",
+    "public": true,
+    "case_literals": 3
+  },
+  {
+    "source": "legacy/analyze_sklad_pair_oracles.py",
+    "bytes": 7711,
+    "sha256": "bf0e46cc7c2a7bfcf54d111d0965e7b906e24f1a120200ba0884c6028e64a47b",
+    "public": true,
+    "case_literals": 3
+  },
+  {
+    "source": "legacy/analyze_universal_decryptor_chance.py",
+    "bytes": 6593,
+    "sha256": "b6ffbc8e2ba1798706c32c63049a7f553323fea93e568d02498e46a1dc03dd18",
+    "public": true,
+    "case_literals": 5
+  },
+  {
+    "source": "legacy/analyze_zakupki_doc_clone_candidates.py",
+    "bytes": 3677,
+    "sha256": "1eca1f9e5f13bebfaa7b1db866a9fd72abc37d39440adaa394a3aaa07bc0ef06",
+    "public": true,
+    "case_literals": 5
+  },
+  {
+    "source": "legacy/analyze_zakupki_sparse_fei.py",
+    "bytes": 6013,
+    "sha256": "adb1e4f1810f54fa48d10871817c6b8738118dc50f3820717e38ad91df83bf35",
+    "public": true,
+    "case_literals": 6
+  },
+  {
+    "source": "legacy/aplib_name_pack.c",
+    "bytes": 5527,
+    "sha256": "62d389e84eabbeba0aa32e5e30fab4a3a988c9f28f62feba8b788a8296df451b",
+    "public": true,
+    "case_literals": 0
+  },
+  {
+    "source": "legacy/aplib_name_pack.exe",
+    "bytes": 122359,
+    "sha256": "b5ac5dbbb808ed092ceb114f8a23bb86e51bb7edf690b3a290385be6af51549d",
+    "public": false,
+    "case_literals": 0
+  },
+  {
+    "source": "legacy/apply_folder_pairs.py",
+    "bytes": 4673,
+    "sha256": "0dde83296e188f561c2bf612af0da72b331fbaf5d51ef82a16bdc40ce4c2de73",
+    "public": true,
+    "case_literals": 3
+  },
+  {
+    "source": "legacy/apply_public_pairs.py",
+    "bytes": 1363,
+    "sha256": "197b1ca4f691766b6b332d84d2e0917dcf2247639086148ca56f6bad306f5952",
+    "public": true,
+    "case_literals": 4
+  },
+  {
+    "source": "legacy/apply_sklad_fuzzy_pairs.py",
+    "bytes": 3715,
+    "sha256": "1dbb7aff22317f677c6d6da47636aaa2b7d61297529291e4a916d1b37a1e52eb",
+    "public": true,
+    "case_literals": 4
+  },
+  {
+    "source": "legacy/apply_sklad_pairs.py",
+    "bytes": 3326,
+    "sha256": "2b210c79af200f3004e2f41045a896316a05d0db0a04dcb0b5bf67e05fcd1eae",
+    "public": true,
+    "case_literals": 4
+  },
+  {
+    "source": "legacy/bagira_oracle_variant_probe.py",
+    "bytes": 11231,
+    "sha256": "2ab3e3ce2d72bd7dbf4212794d118f2199c5b6f8d77ada040f1ac8495ae82305",
+    "public": true,
+    "case_literals": 4
+  },
+  {
+    "source": "legacy/bizhub_pdf_profile.py",
+    "bytes": 8799,
+    "sha256": "c3b4bc01d1fb99e6b5765ca92a6d0c1eba0b703bfa7e5b7bdc9ed30dadc28b77",
+    "public": true,
+    "case_literals": 2
+  },
+  {
+    "source": "legacy/clean_recovered_pdf.py",
+    "bytes": 2244,
+    "sha256": "c889c2baec08e07693c9bda92f890094babb9107b43a58e4d1d569e2ec4dc546",
+    "public": true,
+    "case_literals": 4
+  },
+  {
+    "source": "legacy/copy_public_pairs.py",
+    "bytes": 2259,
+    "sha256": "a1f15aadc1bd5e041733402415683b640b253d1f8c6ce9aeac0b099a092f65a7",
+    "public": true,
+    "case_literals": 3
+  },
+  {
+    "source": "legacy/DARKSIDE_ARTICLE_RECOVERY_NOTES_RU.md",
+    "bytes": 6016,
+    "sha256": "609c684fdd764c4c2f8815655a8edc0cce1f236ff7a4c8e46b555282c684b326",
+    "public": false,
+    "case_literals": 0
+  },
+  {
+    "source": "legacy/debug_b71e_candidates.py",
+    "bytes": 2374,
+    "sha256": "10cdb427e2b1f49b5a19128d89af651d658223b8e47b265cf1876fc499413f9c",
+    "public": true,
+    "case_literals": 3
+  },
+  {
+    "source": "legacy/decrypt_two_network_xlsx.py",
+    "bytes": 5174,
+    "sha256": "8efd8b7e84e6ed7f28628c1d6f581e1f8c146a0baf031f69647cded4ea871b45",
+    "public": true,
+    "case_literals": 7
+  },
+  {
+    "source": "legacy/DECRYPTION_HANDOFF_SUMMARY_RU.md",
+    "bytes": 30704,
+    "sha256": "12214b036c757bfb10dd9fa1cf36f8fb444d4b6398f8b976b81cefe5ba81aac2",
+    "public": false,
+    "case_literals": 0
+  },
+  {
+    "source": "legacy/deep_exploitation_remaining_analysis.py",
+    "bytes": 7656,
+    "sha256": "1e964f5ff022c6624cac13c48c78b97c1250512134b1a95204e044e8ab135a07",
+    "public": true,
+    "case_literals": 7
+  },
+  {
+    "source": "legacy/deep_fei_analysis_4f.py",
+    "bytes": 9735,
+    "sha256": "56c798420341b62af458eafeebc0a2a0fa952b0b1fb71e04ed81a4453a30bf0f",
+    "public": true,
+    "case_literals": 9
+  },
+  {
+    "source": "legacy/deep_folder_remaining_analysis.py",
+    "bytes": 5426,
+    "sha256": "896ab2612bfd5b8481ae31a709287301d172f20700e6fe35460431e820254cb4",
+    "public": true,
+    "case_literals": 7
+  },
+  {
+    "source": "legacy/export_sklad_keystream_seeds.py",
+    "bytes": 4306,
+    "sha256": "f856aae999ef8ff982a6c3a3c64d52a680ab895e0c51bd77eb5b9d0497446f90",
+    "public": true,
+    "case_literals": 10
+  },
+  {
+    "source": "legacy/export_target_salsa_vectors.py",
+    "bytes": 4090,
+    "sha256": "7962fc96d46437e4ec5308db157287bfbef7cc44922bcde76afa702977c4dcc1",
+    "public": true,
+    "case_literals": 8
+  },
+  {
+    "source": "legacy/fei_fek_pattern_research.py",
+    "bytes": 8661,
+    "sha256": "a359679d3ff0956b2581b7bf8859783f5fa846b299649a9c118f5fbd2a7b1e15",
+    "public": true,
+    "case_literals": 4
+  },
+  {
+    "source": "legacy/fek_prng_research_after_gpu.py",
+    "bytes": 8984,
+    "sha256": "c008151b974720e8f96f9cf55969aa2f3bbe35b83a32daa655de7e1052eca235",
+    "public": true,
+    "case_literals": 5
+  },
+  {
+    "source": "legacy/find_fuzzy_public_pairs.py",
+    "bytes": 1697,
+    "sha256": "e801e21008966aee8f77e921acaeb76181948a37ec1bbfa09d1eaf6b087a0ab3",
+    "public": true,
+    "case_literals": 3
+  },
+  {
+    "source": "legacy/find_public_pairs.py",
+    "bytes": 1440,
+    "sha256": "25bb2d3c31c6384985440b70c7f930a6f7ba458c263ab1d611510cbffc5de4f2",
+    "public": true,
+    "case_literals": 3
+  },
+  {
+    "source": "legacy/find_restore_original_clones_admin.py",
+    "bytes": 3040,
+    "sha256": "05040e7792e953273823ef2d5c4c3aa6245ed0d6ec1fb78719dc8dbc2417394e",
+    "public": true,
+    "case_literals": 5
+  },
+  {
+    "source": "legacy/find_sklad_pairs_in_downloads.py",
+    "bytes": 5747,
+    "sha256": "f1b201a53beb8f9b4deb8179d52f54929a4d5cd9578277b3fa5cc0e03096cf70",
+    "public": true,
+    "case_literals": 7
+  },
+  {
+    "source": "legacy/find_zakupki_mp4_local_clones.py",
+    "bytes": 3336,
+    "sha256": "6fb9708c37edd9c5e63604e9d8b8750e91184c1e76d0fd489a3397d98211cf74",
+    "public": true,
+    "case_literals": 5
+  },
+  {
+    "source": "legacy/gap6_bruteforce_4f.c",
+    "bytes": 5391,
+    "sha256": "2c3adf1ec7846a199b944027e421e691706ab2e9909f27bdc9548d1d05db77d2",
+    "public": true,
+    "case_literals": 3
+  },
+  {
+    "source": "legacy/gap6_bruteforce_4f.exe",
+    "bytes": 552696,
+    "sha256": "2678b52450ef3b279f3f04adbcde88ca707773a5e82c3299850c0225074fe3c9",
+    "public": false,
+    "case_literals": 0
+  },
+  {
+    "source": "legacy/gap6_bruteforce_4f_fast.c",
+    "bytes": 4872,
+    "sha256": "233fc57205bdca69743019ea745ff10d68edd3bea1da9bc359dd611c046912a2",
+    "public": true,
+    "case_literals": 2
+  },
+  {
+    "source": "legacy/gap6_bruteforce_4f_fast.exe",
+    "bytes": 550826,
+    "sha256": "a868cd26488dbb332de58f43e41fb1cb44987c3e907c9e84bfea681570e0731e",
+    "public": false,
+    "case_literals": 0
+  },
+  {
+    "source": "legacy/hello.c",
+    "bytes": 23,
+    "sha256": "ab9ed00102c58384abbda9036aa283d4e04d2c6e6e5acc98e01f6e13b22be0fe",
+    "public": false,
+    "case_literals": 0
+  },
+  {
+    "source": "legacy/hello.exe",
+    "bytes": 104106,
+    "sha256": "81f6f9117413d895f099d924720d30fcb5f95a68f8593ed3def0ab5b47446ee8",
+    "public": false,
+    "case_literals": 0
+  },
+  {
+    "source": "legacy/ingest_new_pdf_pairs_2026_09_15.py",
+    "bytes": 6823,
+    "sha256": "1100ac3a92ee0cfe9b124c2c410bb1f61ce77bb008bb250bb4f80a95199d5acf",
+    "public": true,
+    "case_literals": 5
+  },
+  {
+    "source": "legacy/inspect_group_known_pair_constraints.py",
+    "bytes": 4327,
+    "sha256": "a8c796e1bbc6340e9b77bc96ec17fa2edaea9993c03876d9ee5bf8f934586c69",
+    "public": true,
+    "case_literals": 10
+  },
+  {
+    "source": "legacy/inspect_zup_fei.py",
+    "bytes": 1015,
+    "sha256": "3f5ea073826d2a3e7e9ac021a0e693beccd5172b424dbed6ddeba85d1af42d8a",
+    "public": true,
+    "case_literals": 2
+  },
+  {
+    "source": "legacy/lockbit3_impl_flaw_analysis.py",
+    "bytes": 15189,
+    "sha256": "e1297cce327be65413931bf1e2d577f2a4a53999fce1ba9108539b20675a42af",
+    "public": true,
+    "case_literals": 3
+  },
+  {
+    "source": "legacy/make_desktop_research_bundle.py",
+    "bytes": 15990,
+    "sha256": "03437de17c73ff52281c3908b4b07e6597fa14e2a5839468d5d8403144e2491e",
+    "public": true,
+    "case_literals": 6
+  },
+  {
+    "source": "legacy/make_gap6_bruteforce_4f.py",
+    "bytes": 6660,
+    "sha256": "765a463a2826346eedf574d3058d587d86fc138eb9cab9226b62bec859b846a5",
+    "public": true,
+    "case_literals": 5
+  },
+  {
+    "source": "legacy/make_gap6_bruteforce_4f_fast.py",
+    "bytes": 7264,
+    "sha256": "da68e091da3c36faa312d3bd67abace0eb6d9c0080674fddfb4d55120554f41a",
+    "public": true,
+    "case_literals": 5
+  },
+  {
+    "source": "legacy/make_pdf_profile_attack_package.py",
+    "bytes": 3839,
+    "sha256": "07eeca364ec75df680a0edcdf7ea19012eb1f2c09692dcd20a7b526385fb46c1",
+    "public": true,
+    "case_literals": 4
+  },
+  {
+    "source": "legacy/make_smart_bruteforce_624.py",
+    "bytes": 10402,
+    "sha256": "19a5836ceba4556a0c2a9b47b3ba6f1ccf1eb611c21c0a985343cab009aed08e",
+    "public": true,
+    "case_literals": 11
+  },
+  {
+    "source": "legacy/make_z3_seed_fix_package.py",
+    "bytes": 3527,
+    "sha256": "26866297a73b7752024375e04b7f40c810253a07c252857fb29ac86f34333fee",
+    "public": true,
+    "case_literals": 5
+  },
+  {
+    "source": "legacy/manual_bruteforce_probe_admin.py",
+    "bytes": 10309,
+    "sha256": "b9c33df0b3abd041e344ead93ddc32e38e47a8be5cb88d923b6d2f1885b7fd77",
+    "public": true,
+    "case_literals": 7
+  },
+  {
+    "source": "legacy/metadata_profile_analysis.py",
+    "bytes": 6350,
+    "sha256": "81f476ad7328b3da7cd634494e036a9355f37a57fe1135d2220eb4b6e861f063",
+    "public": true,
+    "case_literals": 3
+  },
+  {
+    "source": "legacy/monitor_pdf_prefix_night.py",
+    "bytes": 7015,
+    "sha256": "07db1e696d0b17469f8084afb4ed4634bb4d469aadd8dae146a48c836f8d2b2d",
+    "public": true,
+    "case_literals": 0
+  },
+  {
+    "source": "legacy/next_recovery_candidates.py",
+    "bytes": 6692,
+    "sha256": "4bc6ef9f6e44323d4e3cbf8a51b96965ba9fa065d6008886745189d5d09e9b05",
+    "public": true,
+    "case_literals": 3
+  },
+  {
+    "source": "legacy/overnight_pdf_prefix_search.py",
+    "bytes": 11163,
+    "sha256": "d88c490898949a1fc4d71d077f1cf7d584d69380dd79b32062bce5a6770eff3f",
+    "public": true,
+    "case_literals": 10
+  },
+  {
+    "source": "legacy/package_pc_handoff.py",
+    "bytes": 10050,
+    "sha256": "449a580862202ef6d173a937a2ae85af9d4665f7ef8683c7739cb53cb3cbacf5",
+    "public": true,
+    "case_literals": 13
+  },
+  {
+    "source": "legacy/pdf_profile_pseudopair_attack_624.py",
+    "bytes": 13381,
+    "sha256": "0e019deee4522591698703b0d28b70e42ef26fced239bb57cde1678cc17b91d1",
+    "public": true,
+    "case_literals": 6
+  },
+  {
+    "source": "legacy/pdf_profile_stableword_attack_624.py",
+    "bytes": 10855,
+    "sha256": "00e6f4ca7181e5c0c9c7b1c05cbdf0e7ea3aa771f5f09581b008f48875dbc1d4",
+    "public": true,
+    "case_literals": 7
+  },
+  {
+    "source": "legacy/probe_gap0_candidates.py",
+    "bytes": 4628,
+    "sha256": "ed9dccd5dc6eb5fdce54ac139f3c5c586d261804951ad3fcb2b9f7f30ca11592",
+    "public": true,
+    "case_literals": 3
+  },
+  {
+    "source": "legacy/rank_zakupki_mp4_targets.py",
+    "bytes": 4067,
+    "sha256": "dfb53b21ab6b0498bfcc31ef6125ab40681a349c93426cbe1c04315bb89af7e0",
+    "public": true,
+    "case_literals": 4
+  },
+  {
+    "source": "legacy/reconstruct_fei_model_4f.py",
+    "bytes": 9052,
+    "sha256": "07997b0904af867d28ad25b06d0d291b625c5fc4df583893b3322268cff1b136",
+    "public": true,
+    "case_literals": 4
+  },
+  {
+    "source": "legacy/recover_desktop_tree.py",
+    "bytes": 58083,
+    "sha256": "8306ee283198a2ddc05f5f9f3eea718b0aca7e62bec143cbdad8a220be343d8e",
+    "public": true,
+    "case_literals": 21
+  },
+  {
+    "source": "legacy/recover_missing_fek0_from_fei_report.py",
+    "bytes": 3466,
+    "sha256": "dccccf060c394ab4c4eb343783c24a8a38ffe6ddb49a4c14c04ae1af5cb134a5",
+    "public": true,
+    "case_literals": 4
+  },
+  {
+    "source": "legacy/recover_pdf.py",
+    "bytes": 2205,
+    "sha256": "f209bfa0a00b178fc6156bcfe005353a4c6c78f8eed066b91cdd8c56c68ccb1c",
+    "public": true,
+    "case_literals": 4
+  },
+  {
+    "source": "legacy/recover_proizvodstvo_tree.py",
+    "bytes": 13864,
+    "sha256": "7994870097b7a38f78860c95eed4fd246fd29ed776195f676d4dc4783b16d48c",
+    "public": true,
+    "case_literals": 7
+  },
+  {
+    "source": "legacy/recover_sklad_tree.py",
+    "bytes": 13710,
+    "sha256": "d982430af48609ed627a3e4e11c9514e4b59d633017e1bc34fee405f5d4f62fa",
+    "public": true,
+    "case_literals": 7
+  },
+  {
+    "source": "legacy/recover_smk_tree.py",
+    "bytes": 13704,
+    "sha256": "e5aa653f8b87ae805005f876eb66b48261b9e6ecc65f2ab2428bf07c89d0f50c",
+    "public": true,
+    "case_literals": 7
+  },
+  {
+    "source": "legacy/recover_zakupki_tree.py",
+    "bytes": 13708,
+    "sha256": "ec3f61000bca3d53bee5421f6cc5553ebfdd181d967004b936b4bea704cdda55",
+    "public": true,
+    "case_literals": 7
+  },
+  {
+    "source": "legacy/render_check.py",
+    "bytes": 2969,
+    "sha256": "9a61b28d547804dd2f93cf4558bc5bb326a80c7a501b1804c57abf5605f03236",
+    "public": true,
+    "case_literals": 5
+  },
+  {
+    "source": "legacy/repair_recovered_videos.py",
+    "bytes": 4970,
+    "sha256": "625a5464602212bc46d9145a08bb0404a4f611d8eb816f191fdea9ade5451b53",
+    "public": true,
+    "case_literals": 0
+  },
+  {
+    "source": "legacy/restore_exact_clones_relaxed.py",
+    "bytes": 3953,
+    "sha256": "939d0a81c4e052009a7c32312f561b7900b20ec0efc4822e24c5a2b2bc7f53a6",
+    "public": true,
+    "case_literals": 7
+  },
+  {
+    "source": "legacy/restore_missing_exact_clones_local.py",
+    "bytes": 3003,
+    "sha256": "b559b58d177992199e977f6ede95b56128cea79c78a9a334b5d568cdc8fe6fe3",
+    "public": true,
+    "case_literals": 5
+  },
+  {
+    "source": "legacy/restore_missing_exact_clones_multi.py",
+    "bytes": 4125,
+    "sha256": "82cd049e1deabb9e6afdb4fc86af5c533c3ac5def31961e385ba52901b1ffbf9",
+    "public": true,
+    "case_literals": 6
+  },
+  {
+    "source": "legacy/restore_zakupki_probable_doc_clones.py",
+    "bytes": 2118,
+    "sha256": "4c5ef271f82ebaaefc923562a4698a3c0f94a1e46150bcd42b517ad2aa446d41",
+    "public": true,
+    "case_literals": 3
+  },
+  {
+    "source": "legacy/run_gap6_48h_checkpoint_visible.ps1",
+    "bytes": 2269,
+    "sha256": "768906a85dcd6a6e0caf6ede24538527aa151ef1cd83a59288b5449c697be2c2",
+    "public": false,
+    "case_literals": 0
+  },
+  {
+    "source": "legacy/run_gap6_chunked_bruteforce.py",
+    "bytes": 3214,
+    "sha256": "8021d66a6bbfcc45d1f45dfe3fb8792a97c03beaffe8e0d7def311f91bbf2b98",
+    "public": true,
+    "case_literals": 3
+  },
+  {
+    "source": "legacy/run_gap6_priority_12h_visible.ps1",
+    "bytes": 2422,
+    "sha256": "8030eb86a627720ad7f9c5bc4a8d64da07d61b1c353497f202b88ec4384eb822",
+    "public": false,
+    "case_literals": 0
+  },
+  {
+    "source": "legacy/run_gap6_priority_14threads_visible.ps1",
+    "bytes": 1922,
+    "sha256": "c8ca937c2b5e8e8578983d32b37cddec042a2737d0775bf9307a7f66b89edf5c",
+    "public": false,
+    "case_literals": 0
+  },
+  {
+    "source": "legacy/run_gap6_priority_bruteforce.py",
+    "bytes": 5911,
+    "sha256": "4b530865e59e290e1d0548ed3917673e125e9557a34b36b005b8109e64ab3229",
+    "public": true,
+    "case_literals": 2
+  },
+  {
+    "source": "legacy/run_overnight_pdf_prefix_search.ps1",
+    "bytes": 1097,
+    "sha256": "dd86cc2bd95418311fb9bd4ff2b9da326642336cb540d247d3c26f9da0c8792e",
+    "public": false,
+    "case_literals": 0
+  },
+  {
+    "source": "legacy/run_recover_new_folders.ps1",
+    "bytes": 621,
+    "sha256": "760af5e1cd222662480bc97b31d7b3cc63221b99e96c068e7a206521a739ef83",
+    "public": false,
+    "case_literals": 0
+  },
+  {
+    "source": "legacy/run_sklad_2026_pdf_overnight.ps1",
+    "bytes": 2198,
+    "sha256": "d5422b1b12faf60c1560f5a4cb4ebc0e74c6e96e45a4838ce1573b80b56e751b",
+    "public": false,
+    "case_literals": 0
+  },
+  {
+    "source": "legacy/run_sklad_4f_shared_tail_z3_visible.ps1",
+    "bytes": 1986,
+    "sha256": "e2b9fe6ec1d02628f8f4e4a06abfdb7ca5a963d601159c1c6888300ed51924e2",
+    "public": false,
+    "case_literals": 0
+  },
+  {
+    "source": "legacy/run_sklad_pdf_external.cmd",
+    "bytes": 1595,
+    "sha256": "a61b0df5bed692fb6e326689c8e21e6ec5168c8cffcf07f07894cb5c42d4a8d4",
+    "public": false,
+    "case_literals": 0
+  },
+  {
+    "source": "legacy/run_sklad_pdf_external_visible.ps1",
+    "bytes": 2150,
+    "sha256": "46af860ba9849fd124e375c64caa881eab059c55dfd2bc072571c2aec783f6cb",
+    "public": false,
+    "case_literals": 0
+  },
+  {
+    "source": "legacy/run_sklad_z3_251114_visible.ps1",
+    "bytes": 2180,
+    "sha256": "1baa071bf2ab8f510b688f8f55ae90f9e065b206ed5a2600ff51a354c9069c6d",
+    "public": false,
+    "case_literals": 0
+  },
+  {
+    "source": "legacy/salvage_exploitation_auto_tail.py",
+    "bytes": 8473,
+    "sha256": "5ba0ce17af6da690388800e98441b033a5398fb4792415f64fe284a8d1b85cb8",
+    "public": true,
+    "case_literals": 2
+  },
+  {
+    "source": "legacy/salvage_exploitation_interval_params.py",
+    "bytes": 6853,
+    "sha256": "c99debf1dddc4ffa82e772ec93e16a030cce4e8d2018402432343e4124bc8fb6",
+    "public": true,
+    "case_literals": 5
+  },
+  {
+    "source": "legacy/salvage_exploitation_remaining_tail.py",
+    "bytes": 5769,
+    "sha256": "613cd610d6ffa560ac0ba74f850c115dd318eea6515509b01bac9e3af1d2522d",
+    "public": true,
+    "case_literals": 3
+  },
+  {
+    "source": "legacy/salvage_exploitation_tail_modes.py",
+    "bytes": 7236,
+    "sha256": "84cf65f40a7332805256fb5f111e2d106bf77d697a6bf378bd2df8f460388e69",
+    "public": true,
+    "case_literals": 4
+  },
+  {
+    "source": "legacy/salvage_folder_gap0_typed.py",
+    "bytes": 6951,
+    "sha256": "0351c7808bcecb8b583ec3471882d30814c7bbe74ec2d6c820b68aaceb3dcb79",
+    "public": true,
+    "case_literals": 5
+  },
+  {
+    "source": "legacy/salvage_folder_gap0_zip_and_spotlight.py",
+    "bytes": 6839,
+    "sha256": "8876a9606c832912fc8cd61f55668a68fe65617be91579214b71b574a2a21537",
+    "public": true,
+    "case_literals": 5
+  },
+  {
+    "source": "legacy/salvage_gap0_firstchunk_sweep.py",
+    "bytes": 5073,
+    "sha256": "f4f34b1494b58a77848d5bd84015ab3b5ef8950f3255aa47d37f47aa5afe59a8",
+    "public": true,
+    "case_literals": 5
+  },
+  {
+    "source": "legacy/salvage_gap0_relaxed_typed.py",
+    "bytes": 5601,
+    "sha256": "ed94d752cd0bb308ee8f74a7b496786310e08efd912003f3712f1844f788ed0c",
+    "public": true,
+    "case_literals": 6
+  },
+  {
+    "source": "legacy/salvage_gap0_service_and_text.py",
+    "bytes": 4636,
+    "sha256": "afd4f459560a24e300951f54dd199a042c91d0308cc14f1a5a96dd03f5a86554",
+    "public": true,
+    "case_literals": 5
+  },
+  {
+    "source": "legacy/salvage_noext_spotlight.py",
+    "bytes": 1940,
+    "sha256": "5d58e8c1658ce9b8fa5d5f6fcaa8369e453339f07d836cfdd277a1e6e78f1007",
+    "public": true,
+    "case_literals": 4
+  },
+  {
+    "source": "legacy/salvage_ohrana_gap0.py",
+    "bytes": 6726,
+    "sha256": "a7235f34442c372b2286b78f165b00a9a38725a181e03cb68dc284706227045b",
+    "public": true,
+    "case_literals": 3
+  },
+  {
+    "source": "legacy/salvage_ohrana_tail_chunks.py",
+    "bytes": 6009,
+    "sha256": "dfe2c5eabe391d1adfef0713f594b6b81ba68a4b3a7b0e1c6c9407e062e58695",
+    "public": true,
+    "case_literals": 1
+  },
+  {
+    "source": "legacy/salvage_zakupki_mp4_clean_runs.py",
+    "bytes": 14271,
+    "sha256": "db866b8f16ea73046413eca95f29d37587379576d54667c505d11cf576ccd57a",
+    "public": true,
+    "case_literals": 6
+  },
+  {
+    "source": "legacy/salvage_zakupki_zip_tail.py",
+    "bytes": 8165,
+    "sha256": "d6c6a2b70b45f46f30bf983279244c75e4d24be744e13d794663dbc21d2fe15d",
+    "public": true,
+    "case_literals": 6
+  },
+  {
+    "source": "legacy/scan_gap_probe.py",
+    "bytes": 2236,
+    "sha256": "59f95bc489892220edffb49e6679729d5ccd64d85c9863003d8bc032cac58b79",
+    "public": true,
+    "case_literals": 3
+  },
+  {
+    "source": "legacy/scan_large_fei.py",
+    "bytes": 1131,
+    "sha256": "ee4cd03b64ad809e03eec93a8cb72b70516145fc6376a92f20502ed4ba7f8384",
+    "public": true,
+    "case_literals": 3
+  },
+  {
+    "source": "legacy/scan_pdf_clone_recover.py",
+    "bytes": 7045,
+    "sha256": "56910a0e5c7f1cd362f513f622d7ec08e51ed7b4ac406a5e00dcacf8f061fda7",
+    "public": true,
+    "case_literals": 4
+  },
+  {
+    "source": "legacy/scan_pdf_near_clone_report.py",
+    "bytes": 4998,
+    "sha256": "ec7488ae9ed4e72f50031871b9e2b85c7217c4ae27152df6ba0982f8a5034b1c",
+    "public": true,
+    "case_literals": 5
+  },
+  {
+    "source": "legacy/scan_same_kek.py",
+    "bytes": 1048,
+    "sha256": "0420e814a942264a1a6ff9e8fcfaabdbe6889c3187308716a95c69692555cce7",
+    "public": true,
+    "case_literals": 3
+  },
+  {
+    "source": "legacy/scan_same_kek_for_file.py",
+    "bytes": 1220,
+    "sha256": "4da0cc01bd6814069d0659bc311eb261635fa59a23b32997c033be67bb89c833",
+    "public": true,
+    "case_literals": 1
+  },
+  {
+    "source": "legacy/scan_status_and_missing.py",
+    "bytes": 5140,
+    "sha256": "5da7e631afc13a8a3125833e78a376654aac0e98fa6ca3d5b899f6fb06468b17",
+    "public": true,
+    "case_literals": 2
+  },
+  {
+    "source": "legacy/scan_zakupki_zip_plain_headers.py",
+    "bytes": 3387,
+    "sha256": "be259ce6cc3319cf17327df42249a7bed43be4b9af39eb5afeae031f06db8cc0",
+    "public": true,
+    "case_literals": 3
+  },
+  {
+    "source": "legacy/SKLAD_RECOVERY_SUMMARY_RU.md",
+    "bytes": 19654,
+    "sha256": "5812d2a3d18a386fc10e13b704666b1aa3259d8d2846c876326c115e387bd3e5",
+    "public": false,
+    "case_literals": 0
+  },
+  {
+    "source": "legacy/smart_bruteforce_624.c",
+    "bytes": 18159,
+    "sha256": "e9ce6ef4788481bb34aea45c32ef63b7d502796e246bc0329ef92fd3644d0e3e",
+    "public": true,
+    "case_literals": 29
+  },
+  {
+    "source": "legacy/smart_bruteforce_624.exe",
+    "bytes": 122538,
+    "sha256": "8932d74a15070d6ef3602a117535cd6e3a892b7381468c5857f187a9b3f8f1ff",
+    "public": false,
+    "case_literals": 0
+  },
+  {
+    "source": "legacy/smart_bruteforce_624_meter.exe",
+    "bytes": 131754,
+    "sha256": "2503c6467e709f35166b07952ffb986a42042b04afcadba4cac35d223c4bcb69",
+    "public": false,
+    "case_literals": 0
+  },
+  {
+    "source": "legacy/smart_bruteforce_624_safe.exe",
+    "bytes": 122538,
+    "sha256": "84dd19c25823ec6b311fce389aaa1a2482a7f4261154161ed067c9a56d439261",
+    "public": false,
+    "case_literals": 0
+  },
+  {
+    "source": "legacy/solve_bagira_pdf_header_z3.py",
+    "bytes": 7572,
+    "sha256": "39f9e1a8bc639fbffaf400443ae85bfc780be66d9a13a88356107c4d431757cf",
+    "public": true,
+    "case_literals": 4
+  },
+  {
+    "source": "legacy/solve_group_tail_ks_z3.py",
+    "bytes": 3759,
+    "sha256": "ac83e025febec4818bfa3c0b1f8be853c9703ead34c7bc244f6d0ff1c8bf7207",
+    "public": true,
+    "case_literals": 3
+  },
+  {
+    "source": "legacy/solve_metro_msg_then_retry.py",
+    "bytes": 6413,
+    "sha256": "d3e065ce2f2ed019d9f0673e429b25ef6f2a78d1747c8e50f3696f0bfdfbbad3",
+    "public": true,
+    "case_literals": 6
+  },
+  {
+    "source": "legacy/solve_metro_pdf_msg_global_z3.py",
+    "bytes": 6593,
+    "sha256": "05fd1f71ac0666e47fc638d570b347e8e935a4f34b7be40ccc62c73fad3dec7e",
+    "public": true,
+    "case_literals": 4
+  },
+  {
+    "source": "legacy/solve_scan_b71e_shared_ks_z3.py",
+    "bytes": 7072,
+    "sha256": "a447383d8a7a7725c3b2944cc2aaf54d13027834b257deb1e78daaaa8338f9ab",
+    "public": true,
+    "case_literals": 4
+  },
+  {
+    "source": "legacy/solve_sklad_4f_external_pairs_z3.py",
+    "bytes": 7164,
+    "sha256": "784e4ce24019f2563724b372d02302d96c6479f6bc27485a17ce7dfd2b44559e",
+    "public": true,
+    "case_literals": 7
+  },
+  {
+    "source": "legacy/solve_sklad_4f_shared_tail_z3.py",
+    "bytes": 6269,
+    "sha256": "8abb30faecd0c164460a417bb3745cdbceefa27624195c80ea8c55d82e4ed7f8",
+    "public": true,
+    "case_literals": 4
+  },
+  {
+    "source": "legacy/solve_surgut_knownpair_z3_once.py",
+    "bytes": 5161,
+    "sha256": "95bc1467b85e6ee5af5fb06b56b33a6b858c156dca93f69ee7eb47f3086b4242",
+    "public": true,
+    "case_literals": 3
+  },
+  {
+    "source": "legacy/solve_tail_fek_z3.py",
+    "bytes": 7172,
+    "sha256": "152db291be68bd8861d6c2be46a5d5e74252c553a1915c1b80ad31dee508bc59",
+    "public": true,
+    "case_literals": 4
+  },
+  {
+    "source": "legacy/solve_zakupki_docx_zip_z3.py",
+    "bytes": 5061,
+    "sha256": "bf6685a14b370e5fa679950cb72e8bbaacf60d953904e10b8e040d538028f212",
+    "public": true,
+    "case_literals": 7
+  },
+  {
+    "source": "legacy/solve_zakupki_external_pair_z3.py",
+    "bytes": 4842,
+    "sha256": "534d700c755343525d82625f0309e8562ac3ee7120f896f0c869914caa627604",
+    "public": true,
+    "case_literals": 4
+  },
+  {
+    "source": "legacy/solve_zakupki_jpeg_group_z3.py",
+    "bytes": 4660,
+    "sha256": "c95cbfb270481d34d12e77c1fe80f47d19b345dcb7a7d320ff45c71daa87dbc6",
+    "public": true,
+    "case_literals": 5
+  },
+  {
+    "source": "legacy/solve_zakupki_jpeg_template_z3.py",
+    "bytes": 5877,
+    "sha256": "1b873621298b19364b336a3fb3f0b6cd88833a9739993b3543b3bb57ecf0f43e",
+    "public": true,
+    "case_literals": 6
+  },
+  {
+    "source": "legacy/solve_zakupki_mp4_body_constraints_z3.py",
+    "bytes": 12701,
+    "sha256": "4843223572896b75c6bc95c06471dd5c77acec582040521ca9c76ac8c7a8b7a6",
+    "public": true,
+    "case_literals": 6
+  },
+  {
+    "source": "legacy/solve_zakupki_mp4_group_z3.py",
+    "bytes": 3909,
+    "sha256": "b987459ece384a8ef1a2b7e791be19704ad91607793aa1a909157aeff5315e48",
+    "public": true,
+    "case_literals": 7
+  },
+  {
+    "source": "legacy/solve_zakupki_pdf_prefix_templates_z3.py",
+    "bytes": 5460,
+    "sha256": "5bb6f87bcc84939b501251cb8e84dbcc0e8d13d9ea951c395714eb9fcd947a12",
+    "public": true,
+    "case_literals": 5
+  },
+  {
+    "source": "legacy/surgut_cov172_diag.py",
+    "bytes": 3588,
+    "sha256": "6d4dca81ac46db87ce76d321d49083797987b3a822e47a9983f5148bc90138b6",
+    "public": true,
+    "case_literals": 1
+  },
+  {
+    "source": "legacy/surgut_gap0_param_sweep.py",
+    "bytes": 3745,
+    "sha256": "704ad2ab3a09d42c1ebf19e87f4570136228dde4a9e8dc443592cded5a05511b",
+    "public": true,
+    "case_literals": 2
+  },
+  {
+    "source": "legacy/target_group_pdf_profile.py",
+    "bytes": 12286,
+    "sha256": "e1de2e8e07df998613be29b15dd844c7a8dc079d4278511950fff06597352b9e",
+    "public": true,
+    "case_literals": 8
+  },
+  {
+    "source": "legacy/try_zup_full_self_oracle.py",
+    "bytes": 2158,
+    "sha256": "9e6b22f84cb1d70c5486b19d4aee9b07fae968f11dad5dca4ea7ea3565807da5",
+    "public": true,
+    "case_literals": 4
+  },
+  {
+    "source": "legacy/try_zup_self_oracle.py",
+    "bytes": 2549,
+    "sha256": "2d0ed9818193b28d78328ec605e23a53b99bcf1b63ff64dbae7f1ae4d5b7f939",
+    "public": true,
+    "case_literals": 6
+  },
+  {
+    "source": "legacy/update_missing_reports.py",
+    "bytes": 3888,
+    "sha256": "46932d9dc45b114228fcc842d7155281daced87005da32f705168f09c8fed925",
+    "public": true,
+    "case_literals": 2
+  },
+  {
+    "source": "legacy/update_recursive_missing_reports.py",
+    "bytes": 4992,
+    "sha256": "9a29694502192e0111947353536f51d631d897dfe60ebaf20f85fa8cb70ce675",
+    "public": true,
+    "case_literals": 2
+  },
+  {
+    "source": "legacy/validate_aplib_filename_oracle.py",
+    "bytes": 8311,
+    "sha256": "706ebbf25427e5ba08a6885549ba8ac0deba76d6bc216fc612ec9a7543be84fa",
+    "public": true,
+    "case_literals": 4
+  },
+  {
+    "source": "legacy/volume_priority_analysis.py",
+    "bytes": 4240,
+    "sha256": "24b0ebe5e6e4074fac130b3fb53b3c2370587bdab454132e68d5f1879b4efd31",
+    "public": true,
+    "case_literals": 3
+  },
+  {
+    "source": "legacy/write_fek_research_report.py",
+    "bytes": 7825,
+    "sha256": "840a9cb2aaa3ccff0413633dbd2cc02ccb82160a6ee61cf22ea9c49a7ebcc6a9",
+    "public": true,
+    "case_literals": 6
+  },
+  {
+    "source": "legacy/write_pdf_oracle_progress_report.py",
+    "bytes": 4547,
+    "sha256": "c81d42f4cc7e476a460468a48245b9c98045cad0d70351a02063e1e7254966e3",
+    "public": true,
+    "case_literals": 4
+  },
+  {
+    "source": "legacy/z3_cube_624_tail_worker.py",
+    "bytes": 11703,
+    "sha256": "dd32e29031643da6d34739115a1f0aee7aedb018af4d7e77521759a38015e95a",
+    "public": true,
+    "case_literals": 6
+  },
+  {
+    "source": "legacy/z3_narrow_sklad_pdf_to_gpu.py",
+    "bytes": 9707,
+    "sha256": "d98e96fb381140cc3bebb8b38122396e86fa90660f54f9b4c930376e1838f2c6",
+    "public": true,
+    "case_literals": 4
+  },
+  {
+    "source": "legacy/z3_salsa_word_strategy_4f.py",
+    "bytes": 6106,
+    "sha256": "7c487ee14b142107bc672cb9025ba05c863a2d19ce0f819af9ac511754032fa8",
+    "public": true,
+    "case_literals": 4
+  },
+  {
+    "source": "legacy/z3_seeded_group_tail_strategy.py",
+    "bytes": 8868,
+    "sha256": "25338247fe975a454fe78380dd6405b7bbbc48b6727cf1f39dbe7fd17127edcc",
+    "public": true,
+    "case_literals": 1
+  },
+  {
+    "source": "legacy/z3_seeded_pdf_prefix_attack.py",
+    "bytes": 7779,
+    "sha256": "fcbc222e108ec95bd1bda0b9a06ddff93691a0ca6763821418a51344e6ee9a2f",
+    "public": true,
+    "case_literals": 6
+  },
+  {
+    "source": "legacy/z3_trained_group_tail_strategy.py",
+    "bytes": 6772,
+    "sha256": "04e9fc1622418d766cb38ab627f2b2975486c14f35b5300695de83b42a19dce2",
+    "public": true,
+    "case_literals": 4
+  },
+  {
+    "source": "legacy/zup_compare_truncated_full.py",
+    "bytes": 1895,
+    "sha256": "575067d81ca661b4a2fead4650ac6b57983185ffe4d7afc412cd66d41a75e213",
+    "public": true,
+    "case_literals": 2
+  },
+  {
+    "source": "legacy/zup_five_file_analysis.py",
+    "bytes": 10059,
+    "sha256": "ea51e574b29fb6a06c7ca1a5b664d5e979455bc740b26fe6265014059676eb92",
+    "public": true,
+    "case_literals": 14
+  },
+  {
+    "source": "legacy/zup_inspect_pk_hits.py",
+    "bytes": 824,
+    "sha256": "def94bda594434b04261cdd79f0f6f3663653ff1f4cecc1554c62b4d9496f551",
+    "public": true,
+    "case_literals": 1
+  },
+  {
+    "source": "legacy/zup_make_salvage_copy.py",
+    "bytes": 2818,
+    "sha256": "a1e653f209e7ff955b3e222f78305c56d52bf1aee157ebc400849b4d9b0b7580",
+    "public": true,
+    "case_literals": 3
+  },
+  {
+    "source": "legacy/zup_plaintext_probe.py",
+    "bytes": 3127,
+    "sha256": "c6f544b9cbf1e9102ee4260c4c71b42cf6c15db6ae8eaabe99285238ae3f731a",
+    "public": true,
+    "case_literals": 2
+  },
+  {
+    "source": "legacy/zup_signature_scan.py",
+    "bytes": 3478,
+    "sha256": "86c0bb2ff2e6268504103d744644cbae3ef8dc78743709847f105bf6036b55f1",
+    "public": true,
+    "case_literals": 2
+  },
+  {
+    "source": "later/advance_chain_04b.py",
+    "bytes": 3744,
+    "sha256": "1f5612cef5ef52320883ecb7e46e21e5d9d7ea83dc57513fc7feb5e6ac16cc8d",
+    "public": true,
+    "case_literals": 10
+  },
+  {
+    "source": "later/aplib.h",
+    "bytes": 1921,
+    "sha256": "67a321ebb7753c07f1a4ff679289299f13fff9e52340ac559c73282b14d3597e",
+    "public": true,
+    "case_literals": 0
+  },
+  {
+    "source": "later/brute_chain_04b.py",
+    "bytes": 4592,
+    "sha256": "16ecb5a219f94789159f02dbcdae24fdf536ef7468510c9becbcbcf3e9fc4971",
+    "public": true,
+    "case_literals": 9
+  },
+  {
+    "source": "later/brute_extend_masked.c",
+    "bytes": 26483,
+    "sha256": "b96ec188b9b5ac91edeba7725d148b8cbb9b252ea8e24c5438d1cae2a8468877",
+    "public": true,
+    "case_literals": 0
+  },
+  {
+    "source": "later/direct_04b.exe",
+    "bytes": 118512,
+    "sha256": "49f6ea3102a02534b46ad486e2fd96599e13dfc60f01528e842ad865bd782bdf",
+    "public": false,
+    "case_literals": 0
+  },
+  {
+    "source": "later/extract_and_scan_453.py",
+    "bytes": 2219,
+    "sha256": "2bb5fcaf55358f0b397a07582227fa2d1d8888424cac2bbf766b43acb2aeb11c",
+    "public": true,
+    "case_literals": 4
+  },
+  {
+    "source": "later/gpu_recovery_04b.py",
+    "bytes": 13269,
+    "sha256": "f22994cc319581ea90487fb606b3a578154a569c467a5f1a48d2fa7800a84ca9",
+    "public": true,
+    "case_literals": 1
+  },
+  {
+    "source": "later/package_gpu_04b.py",
+    "bytes": 7847,
+    "sha256": "00953210770a119b8fbde0f4be40731c32b7c91905f56cf3fbd57e55b5c1b78d",
+    "public": true,
+    "case_literals": 8
+  },
+  {
+    "source": "later/probe_gap2_image_04b.py",
+    "bytes": 2694,
+    "sha256": "f180821eefe0137bca4e6d09345830f44a6c54cbfe3e6dbef97df0fd3f27d94f",
+    "public": true,
+    "case_literals": 6
+  },
+  {
+    "source": "later/recover_folder_453.py",
+    "bytes": 6025,
+    "sha256": "46c49a9b94fd120769c61163c984c7e11a4cfdb9ae483f2663ce67b6d219fd60",
+    "public": true,
+    "case_literals": 6
+  },
+  {
+    "source": "later/search_tail_04b.c",
+    "bytes": 1391,
+    "sha256": "a8019ddb07b27dc6a8d4494040ffa49ad7ace17969efe913f3078bff47e42f31",
+    "public": true,
+    "case_literals": 0
+  },
+  {
+    "source": "later/search_tail_04b.exe",
+    "bytes": 547113,
+    "sha256": "87555bc730ea0767b3e7f42838971818b4d7bf9f8ef2e3a166dfad7bb8d9a19d",
+    "public": false,
+    "case_literals": 0
+  },
+  {
+    "source": "later/t.c",
+    "bytes": 25,
+    "sha256": "fd993e6f8c7a88bc030bcd1b83771a82193979e01d9ca211eda038266cc7ec69",
+    "public": false,
+    "case_literals": 0
+  },
+  {
+    "source": "later/t.exe",
+    "bytes": 104142,
+    "sha256": "7b20239ac727b990f76f73c8a6370278a47380d0034c8665d0e388dc06f167a5",
+    "public": false,
+    "case_literals": 0
+  }
+]

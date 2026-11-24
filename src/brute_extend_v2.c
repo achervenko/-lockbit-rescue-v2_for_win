@@ -45,6 +45,8 @@
 
 #define OFFSET_KEY_ENCRYPTION_INFO  0x86
 #define CHUNK_SIZE                  0x20000
+#define MAX_MAGIC_LEN               64
+#define MAX_MAGIC_SCAN_PREFIX       16384
 #define ROTL32(x, n) (((uint32_t)(x) << (n)) | ((uint32_t)(x) >> (32 - (n))))
 
 /* ============================================================================
@@ -263,6 +265,59 @@ static int validate_magic(const uint8_t *decrypted, int dec_len,
     return 1;
 }
 
+static int find_magic_window(const uint8_t *decrypted, int dec_len,
+                             const uint8_t *magic, int magic_len,
+                             int max_offset) {
+    if (magic_len == 0 || !magic) return 1;
+    if (max_offset < 0) max_offset = 0;
+    if (dec_len < magic_len) return 0;
+    int last = max_offset;
+    if (last > dec_len - magic_len) last = dec_len - magic_len;
+    for (int off = 0; off <= last; off++) {
+        int ok = 1;
+        for (int i = 0; i < magic_len; i++) {
+            if (decrypted[off + i] != magic[i]) {
+                ok = 0;
+                break;
+            }
+        }
+        if (ok) return 1;
+    }
+    return 0;
+}
+
+static void decrypt_prefix(uint32_t state_in[16], const uint8_t *encrypted,
+                           long encrypted_len, uint64_t absolute_offset,
+                           uint8_t *decrypted, int want_len) {
+    uint32_t state[16];
+    uint8_t keyblock[64];
+    memcpy(state, state_in, sizeof(state));
+    if (want_len > encrypted_len) want_len = (int)encrypted_len;
+
+    uint64_t block_skip = absolute_offset / 64;
+    uint64_t counter = ((uint64_t)state[9] << 32) | state[8];
+    counter += block_skip;
+    state[8] = (uint32_t)(counter & 0xFFFFFFFF);
+    state[9] = (uint32_t)(counter >> 32);
+
+    int block_offset = (int)(absolute_offset % 64);
+    int offset = 0;
+    while (offset < want_len) {
+        salsa20_block(state, keyblock);
+        int n = want_len - offset;
+        if (n > 64 - block_offset) n = 64 - block_offset;
+        for (int i = 0; i < n; i++) {
+            decrypted[offset + i] = encrypted[offset + i] ^ keyblock[block_offset + i];
+        }
+        state[8]++;
+        if (state[8] == 0) {
+            state[9]++;
+        }
+        block_offset = 0;
+        offset += n;
+    }
+}
+
 /* ============================================================================
  * Shared state for OpenMP parallel brute force
  * ============================================================================ */
@@ -274,10 +329,12 @@ typedef struct {
     const uint8_t *ks;        /* Known keystream */
     int known_len;            /* Length of known keystream */
     int missing;              /* Bytes to brute force */
-    const uint8_t *first_chunk;  /* First chunk of file body */
-    long chunk_size;          /* Size of first chunk */
+    const uint8_t *first_chunk;  /* Validation sample from file body */
+    long chunk_size;          /* Size of validation sample */
+    uint64_t sample_offset;    /* Absolute body offset of validation sample */
     const uint8_t *magic;     /* Magic bytes to validate against */
     int magic_len;            /* Length of magic */
+    int magic_max_offset;      /* Search magic at offsets 0..N */
 
     /* Output (protected by atomic operations) */
     volatile int found;       /* Set to 1 when match found */
@@ -285,6 +342,16 @@ typedef struct {
     uint8_t result_fek[64];   /* Recovered file encryption key */
     uint8_t result_dec32[32]; /* First 32 decrypted bytes */
 } brute_force_context;
+
+static inline uint8_t get_candidate_ks_byte(const brute_force_context *ctx,
+                                            const uint8_t *ks_ext,
+                                            int offset) {
+    if (offset < ctx->known_len) {
+        return ctx->ks[offset];
+    }
+    int ext_idx = offset - ctx->known_len;
+    return (ext_idx >= 0 && ext_idx < ctx->missing) ? ks_ext[ext_idx] : 0;
+}
 
 /* ============================================================================
  * Worker function for parallel brute force (called by each thread)
@@ -304,7 +371,7 @@ static void brute_force_worker(brute_force_context *ctx, uint64_t start, uint64_
 #endif
 
         /* Set the brute-forced keystream bytes */
-        uint8_t ks_ext[4];  /* Max 4 bytes to brute force */
+        uint8_t ks_ext[16];  /* Small gaps only; caller caps search size */
         for (int i = 0; i < ctx->missing; i++) {
             ks_ext[i] = (guess >> (i * 8)) & 0xFF;
         }
@@ -312,21 +379,10 @@ static void brute_force_worker(brute_force_context *ctx, uint64_t start, uint64_
         /* Build Salsa20 state from XOR of FEI ciphertext and keystream */
         for (int i = 0; i < 16; i++) {
             int ki = key_offset + i * 4;
-            uint32_t k0, k1, k2, k3;
-
-            /* Get keystream bytes — known or brute-forced */
-            if (ki < ctx->known_len) {
-                k0 = ctx->ks[ki];
-                k1 = ctx->ks[ki + 1];
-                k2 = ctx->ks[ki + 2];
-                k3 = ctx->ks[ki + 3];
-            } else {
-                int ext_idx = ki - ctx->known_len;
-                k0 = (ext_idx < ctx->missing) ? ks_ext[ext_idx] : 0;
-                k1 = (ext_idx + 1 < ctx->missing) ? ks_ext[ext_idx + 1] : 0;
-                k2 = (ext_idx + 2 < ctx->missing) ? ks_ext[ext_idx + 2] : 0;
-                k3 = (ext_idx + 3 < ctx->missing) ? ks_ext[ext_idx + 3] : 0;
-            }
+            uint32_t k0 = get_candidate_ks_byte(ctx, ks_ext, ki);
+            uint32_t k1 = get_candidate_ks_byte(ctx, ks_ext, ki + 1);
+            uint32_t k2 = get_candidate_ks_byte(ctx, ks_ext, ki + 2);
+            uint32_t k3 = get_candidate_ks_byte(ctx, ks_ext, ki + 3);
 
             state[i] = ((uint32_t)(ctx->tfei[ki] ^ k0))
                      | (((uint32_t)(ctx->tfei[ki + 1] ^ k1)) << 8)
@@ -338,13 +394,15 @@ static void brute_force_worker(brute_force_context *ctx, uint64_t start, uint64_
         salsa20_block(state, keyblock);
 
         /* Validate against magic bytes */
-        uint8_t dec_test[16];
-        int test_len = ctx->magic_len < 16 ? ctx->magic_len : 16;
-        for (int i = 0; i < test_len; i++) {
-            dec_test[i] = ctx->first_chunk[i] ^ keyblock[i];
+        uint8_t dec_test[MAX_MAGIC_SCAN_PREFIX + MAX_MAGIC_LEN];
+        int test_len = ctx->magic_len + ctx->magic_max_offset;
+        if (test_len > MAX_MAGIC_SCAN_PREFIX + MAX_MAGIC_LEN) {
+            test_len = MAX_MAGIC_SCAN_PREFIX + MAX_MAGIC_LEN;
         }
+        if (test_len > ctx->chunk_size) test_len = (int)ctx->chunk_size;
+        decrypt_prefix(state, ctx->first_chunk, ctx->chunk_size, ctx->sample_offset, dec_test, test_len);
 
-        if (validate_magic(dec_test, test_len, ctx->magic, ctx->magic_len)) {
+        if (find_magic_window(dec_test, test_len, ctx->magic, ctx->magic_len, ctx->magic_max_offset)) {
             /* Found the match! Store results atomically */
 #ifdef _OPENMP
             if (__atomic_compare_exchange_n(&ctx->found, &(int){0}, 1,
@@ -370,10 +428,7 @@ static void brute_force_worker(brute_force_context *ctx, uint64_t start, uint64_
                 }
 
                 /* Recover first 32 decrypted bytes */
-                salsa20_block(state, keyblock);
-                for (int i = 0; i < 32 && i < ctx->chunk_size; i++) {
-                    ctx->result_dec32[i] = ctx->first_chunk[i] ^ keyblock[i];
-                }
+                decrypt_prefix(state, ctx->first_chunk, ctx->chunk_size, 0, ctx->result_dec32, 32);
 
 #ifdef _OPENMP
             }
@@ -504,16 +559,41 @@ int main(int argc, char *argv[]) {
     uint64_t skipped_bytes      = (uint64_t)strtoull(argv[8], NULL, 0);
     const char *ks_extend_hex   = (argc > 9) ? argv[9] : NULL;
 
-    /* Parse magic bytes */
-    int magic_len = strlen(magic_hex) / 2;
-    if (magic_len > 16 || magic_len == 0) {
-        fprintf(stderr, "ERROR: Magic must be 1-16 bytes (%d provided)\n", magic_len);
+    /* Parse magic bytes.
+     * Optional @N:<hex> searches in the first sample at offsets 0..N.
+     * Optional $N:<hex> searches in the last N body bytes at offsets 0..N.
+     */
+    int magic_max_offset = 0;
+    int tail_search_bytes = 0;
+    const char *magic_body = magic_hex;
+    if (magic_hex[0] == '@' || magic_hex[0] == '$') {
+        const char *colon = strchr(magic_hex, ':');
+        if (!colon) {
+            fprintf(stderr, "ERROR: Bad ranged magic spec, expected @N:<hex> or $N:<hex>\n");
+            return 1;
+        }
+        int n = atoi(magic_hex + 1);
+        if (n < 0 || n > MAX_MAGIC_SCAN_PREFIX) {
+            fprintf(stderr, "ERROR: Magic scan/window must be 0-%d\n", MAX_MAGIC_SCAN_PREFIX);
+            return 1;
+        }
+        if (magic_hex[0] == '$') {
+            tail_search_bytes = n;
+            magic_max_offset = n;
+        } else {
+            magic_max_offset = n;
+        }
+        magic_body = colon + 1;
+    }
+    int magic_len = strlen(magic_body) / 2;
+    if (magic_len > MAX_MAGIC_LEN || magic_len == 0) {
+        fprintf(stderr, "ERROR: Magic must be 1-%d bytes (%d provided)\n", MAX_MAGIC_LEN, magic_len);
         return 1;
     }
 
-    uint8_t magic[16];
+    uint8_t magic[MAX_MAGIC_LEN];
     for (int i = 0; i < magic_len; i++) {
-        sscanf(magic_hex + i * 2, "%2hhx", &magic[i]);
+        sscanf(magic_body + i * 2, "%2hhx", &magic[i]);
     }
 
     /* Load oracle file */
@@ -612,10 +692,17 @@ int main(int argc, char *argv[]) {
     if (!tfei) { fclose(ft); free(kp); free(ofei); free(ks); return 1; }
     fread(tfei, 1, tfl, ft);
 
-    /* Read first chunk of body */
-    fseek(ft, 0, SEEK_SET);
+    /* Read validation sample from body */
     long content_size = tsize - tfl - OFFSET_KEY_ENCRYPTION_INFO;
     long chunk_read = content_size < CHUNK_SIZE ? content_size : CHUNK_SIZE;
+    uint64_t sample_offset = 0;
+    if (tail_search_bytes > 0) {
+        chunk_read = content_size < tail_search_bytes ? content_size : tail_search_bytes;
+        sample_offset = (uint64_t)(content_size - chunk_read);
+        fseek(ft, (long)sample_offset, SEEK_SET);
+    } else {
+        fseek(ft, 0, SEEK_SET);
+    }
     uint8_t *first_chunk = (uint8_t *)malloc(chunk_read);
     if (!first_chunk) { fclose(ft); free(tfei); free(kp); free(ofei); free(ks); return 1; }
     fread(first_chunk, 1, chunk_read, ft);
@@ -644,13 +731,15 @@ int main(int argc, char *argv[]) {
         uint8_t keyblock[64];
         salsa20_block(state, keyblock);
 
-        uint8_t dec_test[16];
-        int test_len = magic_len < 16 ? magic_len : 16;
-        for (int i = 0; i < test_len && i < chunk_read; i++) {
-            dec_test[i] = first_chunk[i] ^ keyblock[i];
+        uint8_t dec_test[MAX_MAGIC_SCAN_PREFIX + MAX_MAGIC_LEN];
+        int test_len = magic_len + magic_max_offset;
+        if (test_len > MAX_MAGIC_SCAN_PREFIX + MAX_MAGIC_LEN) {
+            test_len = MAX_MAGIC_SCAN_PREFIX + MAX_MAGIC_LEN;
         }
+        if (test_len > chunk_read) test_len = (int)chunk_read;
+        decrypt_prefix(state, first_chunk, chunk_read, sample_offset, dec_test, test_len);
 
-        int ok = validate_magic(dec_test, test_len, magic, magic_len);
+        int ok = find_magic_window(dec_test, test_len, magic, magic_len, magic_max_offset);
         if (!ok) {
             fprintf(stderr, "[!] Magic check failed — bad keystream\n");
             printf("STATUS:BAD_KEYSTREAM\n");
@@ -691,8 +780,10 @@ int main(int argc, char *argv[]) {
     ctx.missing = missing;
     ctx.first_chunk = first_chunk;
     ctx.chunk_size = chunk_read;
+    ctx.sample_offset = sample_offset;
     ctx.magic = magic;
     ctx.magic_len = magic_len;
+    ctx.magic_max_offset = magic_max_offset;
 
     int result = run_brute_force(&ctx);
 

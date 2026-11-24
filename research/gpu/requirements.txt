@@ -1,0 +1,5 @@
+numpy>=1.26
+pyopencl>=2024.1
+Pillow>=10
+olefile>=0.47
+PyMuPDF>=1.24

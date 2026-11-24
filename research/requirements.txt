@@ -1,0 +1,8 @@
+-r ../requirements.txt
+z3-solver>=4.12
+Pillow>=10
+pypdf>=4
+PyMuPDF>=1.24
+numpy>=1.26
+olefile>=0.47
+# GPU dependencies are separate: gpu/requirements.txt

@@ -27,10 +27,16 @@
 /* Cross-platform: conditional includes for POSIX vs Windows */
 #ifdef _WIN32
     #include <windows.h>
+    typedef __int64 file_off_t;
+    #define FSEEK _fseeki64
+    #define FTELL _ftelli64
 #else
     #include <unistd.h>
     #include <sys/types.h>
     #include <fcntl.h>
+    typedef off_t file_off_t;
+    #define FSEEK fseeko
+    #define FTELL ftello
 #endif
 
 #ifdef HAVE_FRANK_H
@@ -206,16 +212,16 @@ static int parse_hex_key(const char *s, uint8_t key[64]) {
  * Progress reporting
  * ============================================================================ */
 
-static void report_progress(long current, long total, clock_t start_time) {
+static void report_progress(file_off_t current, file_off_t total, clock_t start_time) {
     double elapsed = (double)(clock() - start_time) / CLOCKS_PER_SEC;
     if (elapsed < 0.5) return;  /* Don't report too frequently */
 
     double pct = 100.0 * current / total;
-    long rate = (long)(current / elapsed);
-    long eta = (rate > 0) ? (long)((total - current) / rate) : -1;
+    file_off_t rate = (file_off_t)(current / elapsed);
+    file_off_t eta = (rate > 0) ? (file_off_t)((total - current) / rate) : -1;
 
-    fprintf(stderr, "\r[+] Progress: %ld/%ld (%.1f%%) %.0f KB/s ETA: %lds",
-            current, total, pct, rate / 1024.0, eta);
+    fprintf(stderr, "\r[+] Progress: %lld/%lld (%.1f%%) %.0f KB/s ETA: %llds",
+            (long long)current, (long long)total, pct, rate / 1024.0, (long long)eta);
 }
 
 /* ============================================================================
@@ -259,12 +265,12 @@ int main(int argc, char *argv[]) {
     FILE *fi = fopen(in_path, "rb");
     if (!fi) { perror("input"); return 3; }
 
-    fseek(fi, 0, SEEK_END);
-    long total_size = ftell(fi);
-    long body_end = total_size - OFFSET_KEY_ENCRYPTION_INFO;
+    FSEEK(fi, 0, SEEK_END);
+    file_off_t total_size = FTELL(fi);
+    file_off_t body_end = total_size - OFFSET_KEY_ENCRYPTION_INFO;
 
     /* Read fei_len */
-    fseek(fi, -OFFSET_KEY_ENCRYPTION_INFO, SEEK_END);
+    FSEEK(fi, -OFFSET_KEY_ENCRYPTION_INFO, SEEK_END);
     uint16_t fei_len;
     if (fread(&fei_len, 2, 1, fi) != 1) {
         fprintf(stderr, "ERROR: Failed to read fei_len\n");
@@ -272,8 +278,8 @@ int main(int argc, char *argv[]) {
     }
     body_end -= fei_len;
 
-    fprintf(stderr, "[+] File size=%ld, fei_len=%u, body_size=%ld (%.1f KB)\n",
-            total_size, fei_len, body_end, body_end / 1024.0);
+    fprintf(stderr, "[+] File size=%lld, fei_len=%u, body_size=%lld (%.1f KB)\n",
+            (long long)total_size, fei_len, (long long)body_end, body_end / 1024.0);
 
     /* Open output file */
     FILE *fo = fopen(out_path, "wb");
@@ -287,25 +293,25 @@ int main(int argc, char *argv[]) {
     }
 
     /* Decrypt loop with intermittent encryption pattern */
-    fseek(fi, 0, SEEK_SET);
+    FSEEK(fi, 0, SEEK_SET);
     clock_t start_time = clock();
 
     int is_skip = 0;
     uint32_t decrypt_remaining = before_count;
     uint32_t salsa_state[16];
     key_to_state(key, salsa_state);
-    long cur = 0;
+    file_off_t cur = 0;
 
     while (cur < body_end) {
         if (is_skip) {
             /* Skip phase: copy bytes unchanged */
             uint64_t toskip = skipped_bytes;
-            fprintf(stderr, "\n[+] Skipping 0x%llx bytes at offset 0x%lx\n",
-                    (unsigned long long)toskip, cur);
+            fprintf(stderr, "\n[+] Skipping 0x%llx bytes at offset 0x%llx\n",
+                    (unsigned long long)toskip, (unsigned long long)cur);
 
             while (toskip > 0 && cur < body_end) {
                 size_t want = (toskip > CHUNK_SIZE) ? CHUNK_SIZE : (size_t)toskip;
-                if (cur + (long)want > body_end) want = (size_t)(body_end - cur);
+                if (cur + (file_off_t)want > body_end) want = (size_t)(body_end - cur);
 
                 size_t got = fread(chunk, 1, want, fi);
                 if (got == 0) break;
@@ -321,10 +327,10 @@ int main(int argc, char *argv[]) {
             is_skip = 0;
         } else {
             /* Decrypt one chunk */
-            long want = body_end - cur;
+            file_off_t want = body_end - cur;
             if (want > CHUNK_SIZE) want = CHUNK_SIZE;
 
-            size_t got = fread(chunk, 1, want, fi);
+            size_t got = fread(chunk, 1, (size_t)want, fi);
             if (got == 0) break;
 
             decrypt_chunk((uint32_t)got, chunk, key, salsa_state);
@@ -341,7 +347,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    fprintf(stderr, "\n[+] Done. Wrote %s (%ld bytes)\n", out_path, cur);
+    fprintf(stderr, "\n[+] Done. Wrote %s (%lld bytes)\n", out_path, (long long)cur);
 
     free(chunk);
     fclose(fi);

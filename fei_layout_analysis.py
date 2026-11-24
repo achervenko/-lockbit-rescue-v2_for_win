@@ -15,10 +15,10 @@ from pathlib import Path
 import lockbit_rescue_v2 as lr
 
 
-SOURCE = Path(r"C:\Users\alex\Documents\test\01 Актуальные документы")
-RECOVERY = Path(r"C:\Users\alex\Documents\recovered_iterative_pairs")
-PAIRS = Path(r"C:\Users\alex\Desktop\Пары")
-OUT = Path(r"C:\Users\alex\Documents\Codex\2026-08-18\new-chat-2\outputs\fei_layout")
+SOURCE = Path(os.environ.get("RECOVER_SOURCE", "encrypted"))
+RECOVERY = Path(os.environ.get("RECOVER_OUTPUT", "output"))
+PAIRS = Path(os.environ.get("RECOVER_PAIRS", "pairs"))
+OUT = Path(os.environ.get("RECOVER_FEI_REPORTS", "output/_technical_reports/fei_layout"))
 RANSOM_EXT = ".xzg9VRelb"
 BEFORE = 3
 AFTER = 3

@@ -55,3 +55,16 @@ lockbit-rescue-v2/test_data/synthetic_lockbit/
 # OS
 .DS_Store
 Thumbs.db
+
+# Local research snapshots, real case profiles and recovery material
+research/_local/
+research/case_values.json
+research/**/manifest.json
+research/**/progress.json
+research/**/data/
+research/**/recovered/
+*.xzg9VRelb
+_debug_*.pdf
+encrypted/
+output/
+pairs/

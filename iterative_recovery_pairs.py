@@ -19,8 +19,8 @@ from pathlib import Path
 import lockbit_rescue_v2 as lr
 
 
-SOURCE = Path(r"C:\Users\alex\Documents\test\01 Актуальные документы")
-OUT = Path(r"C:\Users\alex\Documents\recovered_iterative_pairs")
+SOURCE = Path(os.environ.get("RECOVER_SOURCE", "encrypted"))
+OUT = Path(os.environ.get("RECOVER_OUTPUT", "output"))
 REPORT = OUT / "iterative_report.txt"
 MANIFEST = OUT / "iterative_manifest.csv"
 RANSOM_EXT = ".xzg9VRelb"
